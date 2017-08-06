@@ -161,7 +161,6 @@ class AccessHandlerExtension {
         _logger.debug('incomming ' + socket.remoteAddress + ' Peer: ' + getUniqueId(socket));
         socket.on('close', onClientDisconnect.bind(socket));
         storeInBrain(socket);
-        _logger.debug(_brain);
     };
 }
 module.exports = AccessHandlerExtension;

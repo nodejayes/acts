@@ -24,27 +24,27 @@ class FileSystemHelper {
     static get pathSep () { return PATH.sep; }
 
     static getFileContent () {
-        return FS.readFileSync.apply(arguments);
+        return FS.readFileSync.apply(FS, arguments);
     }
 
     static readDir () {
-        return FS.readdirSync.apply(arguments);
+        return FS.readdirSync.apply(FS, arguments);
     }
 
     static getStatsAsync () {
-        return FS.stat.apply(arguments);
+        return FS.stat.apply(FS, arguments);
     }
 
     static watch () {
-        return FS.watch.apply(arguments);
+        return FS.watch.apply(FS, arguments);
     }
 
     static getStats () {
-        return FS.statSync.apply(arguments);
+        return FS.statSync.apply(FS, arguments);
     }
 
     static joinPath () {
-        return PATH.join.apply(PATH.join, arguments);
+        return PATH.join.apply(PATH, arguments);
     }
 
     /**
@@ -93,11 +93,11 @@ class FileSystemHelper {
     }
 
     static basename () {
-        return PATH.basename.apply(arguments);
+        return PATH.basename.apply(PATH.basename, arguments);
     }
 
     static extname () {
-        return PATH.extname.apply(arguments);
+        return PATH.extname.apply(PATH.extname, arguments);
     }
 }
 module.exports = FileSystemHelper;

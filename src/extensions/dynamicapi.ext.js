@@ -240,7 +240,7 @@ const getFileName = function (path) {
     _logger.debug('convert url to filepath ' + path);
     let result = '';
     for (let i = 0; i < path.length; i++) {
-        result += path[i] + PATH.sep;
+        result += path[i] + FILE.pathSep;
     }
     if (result.length > 2) {
         result = result.substr(0, result.length - 1) + '.js';
