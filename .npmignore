@@ -3,11 +3,12 @@
 .vscode/**/*
 api/**/*
 coverage/**/*
+docs/**/*
 log/**/*
 sockets/**/*
 spec/**/*
 webroot/**/*
 store/**/*
 .gitignore
-.istanbul.yml
+.istanbul.yaml
 test.js
