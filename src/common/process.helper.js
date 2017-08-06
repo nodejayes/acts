@@ -69,7 +69,7 @@ let _onClose     = null;
  * @param {Object} value
  * @return {Boolean} isFunction? 
  */
-const isFunction (value) {
+const isFunction = function (value) {
     return typeof value === 'function';
 };
 
