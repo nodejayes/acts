@@ -3,19 +3,20 @@
   "version": "2.0.0",
   "description": "Acts is a Application Server that lets you easy create a Backend and Host the Client.",
   "author": {
-      "name": "Markus Gilg",
-      "email": "markusgilg@outlook.de"
+    "name": "Markus Gilg",
+    "email": "markusgilg@outlook.de"
   },
   "license": "MIT",
   "repository": "https://github.com/nodejayes/acts.git",
   "dependencies": {
-    "compression": "latest",
-    "connect": "latest",
-    "debug": "latest",
-    "helmet": "latest",
-    "object-sizeof": "latest",
-    "socketio": "latest",
-    "sqlstring": "latest",
+    "compression": "^1.7.0",
+    "connect": "^3.6.3",
+    "debug": "^2.6.8",
+    "helmet": "^3.8.1",
+    "logwriter": "^1.1.2",
+    "object-sizeof": "^1.2.0",
+    "socketio": "^1.0.0",
+    "sqlstring": "^2.2.0",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
