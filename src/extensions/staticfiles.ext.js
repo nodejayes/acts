@@ -4,6 +4,7 @@
  * @author Markus Gilg
  * @requires FileSystemHelper
  * @requires RequestHelper
+ * @requires ProcessHelper
  * @requires filetypes.json
  */
 'use strict';
@@ -20,6 +21,12 @@ const FILE     = require('./../common/filesystem.helper');
  * @private
  */
 const REQU     = require('./../common/request.helper');
+/**
+ * Process Helper Namespace
+ * @const {Object} PROC
+ * @private
+ */
+const PROC     = require('./../common/process.helper'); 
 /**
  * Filetypes
  * @const {Object} FILETYPES
@@ -184,7 +191,7 @@ class StaticFileExtension {
             _logger.debug('contenttype is ' + contenttype);
             if (_cfg.server.phppath && contenttype === 'application/x-httpd-php') {
                 // works only with absolute path
-                const php = require('./processrunner')(_cfg.server.phppath, [absolutepath]);
+                const php = new PROC(_cfg.server.phppath, [absolutepath]);
                 php.onOut = phpFinish;
                 php.onClose = phpClose;
                 php.execute(res);
