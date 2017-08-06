@@ -63,4 +63,4 @@ sockets/**/*
 webroot/**/*
 api/**/*
 log/**/*
-
+docs/**/*

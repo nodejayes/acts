@@ -10,5 +10,4 @@ webroot/**/*
 store/**/*
 .gitignore
 .istanbul.yml
-sonar.js
 test.js

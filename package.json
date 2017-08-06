@@ -22,14 +22,16 @@
   "devDependencies": {
     "istanbul": "^0.4.5",
     "jasmine-node": "^1.14.5",
+    "jsdoc": "^3.5.4",
     "nodemon": "^1.11.0",
-    "sonarqube-scanner": "1.1.0"
+    "sonarqube-scanner": "1.1.0",
+    "tui-jsdoc-template": "^1.2.2"
   },
   "scripts": {
     "start": "node test.js",
     "watch": "nodemon test.js",
     "test": "istanbul cover --config=.istanbul.yaml ./node_modules/jasmine-node/bin/jasmine-node ./spec/",
     "report": "istanbul report -v --dir report html",
-    "sendsonar": "node ./sonar.js"
+    "docu": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   }
 }
