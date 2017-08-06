@@ -21,7 +21,7 @@ const BODYPARSER = require("./../extensions/parser.ext");
 const REDIRECT   = require("./../extensions/redirect.ext");
 const STATICFILE = require("./../extensions/staticfiles.ext");
 const DYNAMICAPI = require("./../extensions/dynamicapi.ext");
-const ACCESS     = require("./../extensions/accesshandler");
+const ACCESS     = require("./../extensions/accesshandler.ext");
 const FILE       = require('./../common/filesystem.helper');
 const REQU       = require('./../common/request.helper');
 const APP        = CONNECT();
@@ -33,6 +33,7 @@ let _socketio   = null;
 let _ssloptions = null;
 let _plugins    = null;
 let _http       = require('http');
+let _access     = null;
 
 /**
  * try to load all Plugins
@@ -143,7 +144,7 @@ const serverRunning = function () {
  */
 const handleClientConnect = function (socket) {
     _logger.debug('socket connect ' + socket.remoteAddress);
-    ACCESS.onClientConnect(socket);
+    _access.onClientConnect(socket);
 };
 
 /**
@@ -223,6 +224,7 @@ class ActsServer {
     constructor (cfg, plugins, logger) {
         _logger = logger;
         _cfg = cfg;
+        _access = new ACCESS(_cfg, _logger);
 
         FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.webroot));
         FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
