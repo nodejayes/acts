@@ -6,6 +6,18 @@
 'use strict';
 
 /**
+ * Server Configuration
+ * @prop {Object} _cfg
+ * @private
+ */
+let _cfg = null;
+/**
+ * Logwriter Instance
+ * @prop {Object} _logger
+ * @private
+ */
+let _logger = null;
+/**
  * the Socket Cache Grouping by IP
  * @property _brain
  * @private
