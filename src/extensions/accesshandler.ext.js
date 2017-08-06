@@ -145,7 +145,7 @@ class AccessHandlerExtension {
      * @public
      * @param socket {Object} NodeJs Sockt Object
      */
-    onClientConnect = function (socket) {
+    onClientConnect (socket) {
         _logger.debug('incomming ' + socket.remoteAddress + ' Peer: ' + getUniqueId(socket));
         socket.on('close', onClientDisconnect.bind(socket));
         storeInBrain(socket);
