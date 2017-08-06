@@ -7,7 +7,17 @@
 
 const REQU = require('./../common/request.helper');
 
+/**
+ * Server Configuration
+ * @prop {Object} _cfg
+ * @private
+ */
 let _cfg = null;
+/**
+ * Logwriter Instance
+ * @prop {Object} _logger
+ * @private
+ */
 let _logger = null;
 
 /**

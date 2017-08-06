@@ -20,52 +20,9 @@ const FS   = require('fs');
  */
 const PATH = require('path');
 
-/**
- * create path when not exists
- * @method createDirectoryRecursive
- * @param {String} path a Folder Path
- */
-const createDirectoryRecursive = function (path) {
-    FS.stat(path, function (err) {
-        if (err) {
-            const levels = path.split(PATH.sep);
-            let fullpath = "";
-            for (let i = 0; i < levels.length; i++) {
-                const level = levels[i];
-                fullpath += level + PATH.sep;
-                try {
-                    FS.statSync(fullpath);
-                } catch (err) {
-                    FS.mkdirSync(fullpath);
-                }
-            }
-        }
-    });
-};
-
-/**
- * 
- * @function folderDiff
- * @param {String} startfolder 
- * @param {String} currentfolder 
- */
-const folderDiff = function (startfolder, currentfolder) {
-    let result = '';
-    let tmpstart = startfolder.split(PATH.sep);
-    let tmpcurrent = currentfolder.split(PATH.sep);
-    if (tmpcurrent.length < tmpstart) {
-        return result;
-    }
-    for (let i in tmpcurrent) {
-        if (tmpstart.length > i) {
-        continue;
-        }
-        result += tmpcurrent[i] + '-';
-    }
-    return result;
-};
-
 class FileSystemHelper {
+    static get pathSep () { return PATH.sep; }
+
     static getFileContent () {
         return FS.readFileSync.apply(arguments);
     }
@@ -82,12 +39,49 @@ class FileSystemHelper {
         return PATH.join.apply(PATH.join, arguments);
     }
 
+    /**
+     * create path when not exists
+     * @function createDirectoryRecursive
+     * @param {String} path a Folder Path
+     */
     static createDirectoryRecursive (path) {
-        createDirectoryRecursive(path);
+        FS.stat(path, function (err) {
+            if (err) {
+                const levels = path.split(PATH.sep);
+                let fullpath = "";
+                for (let i = 0; i < levels.length; i++) {
+                    const level = levels[i];
+                    fullpath += level + PATH.sep;
+                    try {
+                        FS.statSync(fullpath);
+                    } catch (err) {
+                        FS.mkdirSync(fullpath);
+                    }
+                }
+            }
+        });
     }
 
+    /**
+     * 
+     * @function folderDiff
+     * @param {String} startfolder 
+     * @param {String} currentfolder 
+     */
     static folderDiff (startfolder, currentfolder) {
-        return folderDiff(startfolder, currentfolder);
+        let result = '';
+        let tmpstart = startfolder.split(PATH.sep);
+        let tmpcurrent = currentfolder.split(PATH.sep);
+        if (tmpcurrent.length < tmpstart) {
+            return result;
+        }
+        for (let i in tmpcurrent) {
+            if (tmpstart.length > i) {
+            continue;
+            }
+            result += tmpcurrent[i] + '-';
+        }
+        return result;
     }
 
     static basename () {
