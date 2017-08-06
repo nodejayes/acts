@@ -90,8 +90,8 @@ const splitWithoutEmpty = function (value, tr) {
  * @return {Boolean} isRouteAny
  */
 const isRouteAny = function (url, path) {
-    var tmpReal = REDIRECT.splitWithoutEmpty(url, '/');
-    var tmpMustbe = REDIRECT.splitWithoutEmpty(path, '/');
+    var tmpReal = splitWithoutEmpty(url, '/');
+    var tmpMustbe = splitWithoutEmpty(path, '/');
     // is real address shorte we can go back
     if (tmpReal.length < tmpMustbe.length) {
         return false;
@@ -144,7 +144,7 @@ const fixRoute = function (url, target) {
  */
 const lookingRedirect = function (req, res, rules) {
     let target;
-    _logger.debug('server is ' + REDIRECT.getServerAddress());
+    _logger.debug('server is ' + getServerAddress());
     for (const i in rules) {
         if (rules.hasOwnProperty(i)) {
             const rule = rules[i];
