@@ -43,6 +43,17 @@ class RequestHelper {
     }
 
     /**
+     * handle not allowed Method
+     * @method notAllowedMethod
+     * @param {Object} req a NodeJs Request Object
+     * @param {Object} res a NodeJs Response Object
+     */
+    static notAllowedMethod (req, res) {
+        res.statusCode = 405;
+        res.end();
+    }
+
+    /**
      * handle server error
      * @method internalError
      * @param {Object} req a NodeJs Request Object

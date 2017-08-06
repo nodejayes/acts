@@ -20,7 +20,7 @@ const CORS       = require("./../extensions/cors.ext");
 const BODYPARSER = require("./../extensions/parser.ext");
 const REDIRECT   = require("./../extensions/redirect.ext");
 const STATICFILE = require("./../extensions/staticfiles.ext");
-const DYNAMICAPI = require("./../extensions/dynamicapi");
+const DYNAMICAPI = require("./../extensions/dynamicapi.ext");
 const ACCESS     = require("./../extensions/accesshandler");
 const FILE       = require('./../common/filesystem.helper');
 const REQU       = require('./../common/request.helper');
@@ -114,7 +114,8 @@ const initStandardModules = function () {
     APP.use(tmpStaticFile.request);
 
     // use dynamic api
-    APP.use(DYNAMICAPI(_cfg).request);
+    let tmpDynamicApi = new DYNAMICAPI(_cfg, _logger);
+    APP.use(tmpDynamicApi.request);
 };
 
 /**

@@ -31,6 +31,14 @@ class FileSystemHelper {
         return FS.readdirSync.apply(arguments);
     }
 
+    static getStatsAsync () {
+        return FS.stat.apply(arguments);
+    }
+
+    static watch () {
+        return FS.watch.apply(arguments);
+    }
+
     static getStats () {
         return FS.statSync.apply(arguments);
     }
