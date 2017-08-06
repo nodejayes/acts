@@ -1,7 +1,9 @@
-<h1>Security</h1>
-<h2>Setup HTTPS</h2>
-<p>To use HTTPS you must specify the server.ssl Section in the Configuration File.</p>
-<pre>
+# Security
+## Setup HTTPS
+
+To use HTTPS you must specify the server.ssl Section in the Configuration File.
+
+```javascript
 require("./index").server(process.cwd(), {
   "server": {
     "webroot": "webroot",
@@ -35,5 +37,6 @@ require("./index").server(process.cwd(), {
 .start(function () {
   // insert stuff to do when server is started
 });
-</pre>
-<p>The Core Modul uses Helmet and a Access Handler to increase the Security. You can choose how many Sockets can have one IP Address when this Limit is reached old Sockets was closed.</p>
+```
+
+The Core Modul uses Helmet and a Access Handler to increase the Security. You can choose how many Sockets can have one IP Address when this Limit is reached old Sockets was closed.
