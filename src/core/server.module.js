@@ -90,7 +90,8 @@ const initStandardModules = function () {
     APP.use(HELM());
 
     // CORS Module first
-    APP.use(CORS(_cfg).checkRequest);
+    let tmpCors = new CORS(_cfg, _logger);
+    APP.use(tmpCors.checkRequest);
 
     // load redirect module
     const rd = REDIRECT(_cfg);
@@ -198,7 +199,8 @@ const startServer = function (cb) {
         if (_cfg.server.websockets.usewebsockets && _socketio === null) {
             _logger.debug('websockets was enabled');
             _socketio = IO(server);
-            _socketio.on('connection', WEBSOCKETS(_cfg).setEventsOnSocket);
+            let tmpWebsockets = new WEBSOCKETS(_cfg, _logger);
+            _socketio.on('connection', tmpWebsockets.setEventsOnSocket);
         }
 
         // handle Server Events

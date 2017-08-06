@@ -6,6 +6,18 @@
 'use strict';
 
 /**
+ * handle ok
+ * @method ok
+ * @private
+ * @param {Object} req a NodeJs Request Object
+ * @param {Object} res a NodeJs Response Object
+ */
+const ok = function (req, res) {
+  res.statusCode = 200;
+  res.end();
+};
+
+/**
  * handle not found
  * @method notFound
  * @private
@@ -42,6 +54,10 @@ const internalError = function (req, res) {
 };
 
 class RequestHelper {
+    static ok (req, res) {
+
+    }
+
     static notFound (req, res) {
         return notFound(req, res);
     }
