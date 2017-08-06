@@ -232,7 +232,7 @@ class ActsServer {
      * @param {Function} cb callback when Server is started
      */
     start (cb) {
-        return startServer();
+        return startServer(cb);
     }
 }
 module.exports = ActsServer;
