@@ -19,7 +19,7 @@ const WEBSOCKETS = require('./../extensions/websocket.ext');
 const CORS       = require("./../extensions/cors.ext");
 const BODYPARSER = require("./../extensions/parser.ext");
 const REDIRECT   = require("./../extensions/redirect.ext");
-const STATICFILE = require("./../extensions/staticfiles");
+const STATICFILE = require("./../extensions/staticfiles.ext");
 const DYNAMICAPI = require("./../extensions/dynamicapi");
 const ACCESS     = require("./../extensions/accesshandler");
 const FILE       = require('./../common/filesystem.helper');
@@ -110,7 +110,8 @@ const initStandardModules = function () {
     loadPlugins(_plugins, APP, _cfg);
 
     // use folder for static files from config file
-    APP.use(STATICFILE(_cfg).request);
+    let tmpStaticFile = new STATICFILE(_cfg, _logger);
+    APP.use(tmpStaticFile.request);
 
     // use dynamic api
     APP.use(DYNAMICAPI(_cfg).request);

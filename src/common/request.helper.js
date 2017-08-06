@@ -18,6 +18,20 @@ class RequestHelper {
     }
 
     /**
+     * handle ok with data
+     * @function okWithData
+     * @param {Object} req Node Request Object
+     * @param {Object} res Node Response Object
+     * @param {String} type Content-Type
+     * @param {String} data Response Content
+     */
+    static okWithData (req, res, type, data) {
+        res.setHeader('Content-Type', type);
+        res.statusCode = 200;
+        res.end(data);
+    }
+
+    /**
      * handle not found
      * @method notFound
      * @param {Object} req a NodeJs Request Object
