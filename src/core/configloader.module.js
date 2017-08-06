@@ -10,7 +10,7 @@ module.exports = {
     logfile: {
       file: 'log/server.log',
       maxsize: 20,
-      level: 4
+      level: 2
     },
     cluster: {
       active: false,
