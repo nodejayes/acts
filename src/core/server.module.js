@@ -16,8 +16,8 @@ const IO         = require('socket.io');
 const COMPRESS   = require("compression");
 const HELM       = require("helmet");
 const WEBSOCKETS = require('./../extensions/websocket.ext');
-const CORS       = require("./../extensions/cors");
-const BODYPARSER = require("./../extensions/parser");
+const CORS       = require("./../extensions/cors.ext");
+const BODYPARSER = require("./../extensions/parser.ext");
 const REDIRECT   = require("./../extensions/redirect");
 const STATICFILE = require("./../extensions/staticfiles");
 const DYNAMICAPI = require("./../extensions/dynamicapi");
@@ -98,7 +98,8 @@ const initStandardModules = function () {
     APP.use(rd.handle.bind(rd));
 
     // parse request bodys
-    APP.use(BODYPARSER(_cfg).parse);
+    let tmpParser = new BODYPARSER(_cfg, _logger);
+    APP.use(tmpParser.parse);
 
     // gzip compression
     if (_cfg.server.compress) {
