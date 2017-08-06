@@ -224,6 +224,7 @@ class ActsServer {
     constructor (cfg, plugins, logger) {
         _logger = logger;
         _cfg = cfg;
+        _plugins = plugins;
         _access = new ACCESS(_cfg, _logger);
 
         FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.webroot));
