@@ -1,0 +1,14 @@
+.scannerwork/**/*
+.sonarlint/**/*
+.vscode/**/*
+api/**/*
+coverage/**/*
+log/**/*
+sockets/**/*
+spec/**/*
+webroot/**/*
+store/**/*
+.gitignore
+.istanbul.yml
+sonar.js
+test.js
