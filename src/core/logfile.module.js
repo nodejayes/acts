@@ -14,10 +14,10 @@
 const LOGWRITER = require('logwriter');
 /**
  * Logwriter Instance
- * @const {Object} INSTANCE
+ * @prop {Object} _instance
  * @private
  */
-const INSTANCE = null;
+let _instance = null;
 
 class Logfile {
     /**
@@ -26,7 +26,7 @@ class Logfile {
      * @param {Object} opts Logwriter Options 
      */
     static init (opts) {
-        INSTANCE = new LOGWRITER(opts);
+        _instance = new LOGWRITER(opts);
     }
 
     /**
@@ -35,7 +35,7 @@ class Logfile {
      * @return {Object} Logwriter
      */
     static getInstance () {
-        return INSTANCE;
+        return _instance;
     }
 }
 module.exports = Logfile;
