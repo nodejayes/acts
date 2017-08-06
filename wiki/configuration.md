@@ -1,5 +1,6 @@
-<h1>The Config File</h1>
-<pre>
+# The Config File
+
+```javascript
 {
   "server": {
     "logfile": {
@@ -56,7 +57,8 @@
     "/sockets": "/socket.io"
   }
 }
-</pre>
+```
+
 <table>
 <tr>
     <td>address</td>
