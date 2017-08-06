@@ -43,9 +43,39 @@ const createDirectoryRecursive = function (path) {
     });
 };
 
+/**
+ * 
+ * @function folderDiff
+ * @param {String} startfolder 
+ * @param {String} currentfolder 
+ */
+const folderDiff = function (startfolder, currentfolder) {
+    let result = '';
+    let tmpstart = startfolder.split(PATH.sep);
+    let tmpcurrent = currentfolder.split(PATH.sep);
+    if (tmpcurrent.length < tmpstart) {
+        return result;
+    }
+    for (let i in tmpcurrent) {
+        if (tmpstart.length > i) {
+        continue;
+        }
+        result += tmpcurrent[i] + '-';
+    }
+    return result;
+};
+
 class FileSystemHelper {
-    static getFileContent (path, encoding = 'utf8') {
-        return FS.readFileSync(path, encoding);
+    static getFileContent () {
+        return FS.readFileSync.apply(arguments);
+    }
+
+    static readDir () {
+        return FS.readdirSync.apply(arguments);
+    }
+
+    static getStats () {
+        return FS.statSync.apply(arguments);
     }
 
     static joinPath () {
@@ -54,6 +84,18 @@ class FileSystemHelper {
 
     static createDirectoryRecursive (path) {
         createDirectoryRecursive(path);
+    }
+
+    static folderDiff (startfolder, currentfolder) {
+        return folderDiff(startfolder, currentfolder);
+    }
+
+    static basename () {
+        return PATH.basename.apply(arguments);
+    }
+
+    static extname () {
+        return PATH.extname.apply(arguments);
     }
 }
 module.exports = FileSystemHelper;
