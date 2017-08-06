@@ -18,7 +18,7 @@ const HELM       = require("helmet");
 const WEBSOCKETS = require('./../extensions/websocket.ext');
 const CORS       = require("./../extensions/cors.ext");
 const BODYPARSER = require("./../extensions/parser.ext");
-const REDIRECT   = require("./../extensions/redirect");
+const REDIRECT   = require("./../extensions/redirect.ext");
 const STATICFILE = require("./../extensions/staticfiles");
 const DYNAMICAPI = require("./../extensions/dynamicapi");
 const ACCESS     = require("./../extensions/accesshandler");
@@ -94,8 +94,8 @@ const initStandardModules = function () {
     APP.use(tmpCors.checkRequest);
 
     // load redirect module
-    const rd = REDIRECT(_cfg);
-    APP.use(rd.handle.bind(rd));
+    let tmpRedirect = new REDIRECT(_cfg, _logger);
+    APP.use(tmpRedirect.handle);
 
     // parse request bodys
     let tmpParser = new BODYPARSER(_cfg, _logger);
