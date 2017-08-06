@@ -7,6 +7,7 @@
  * @requires Logfile
  * @requires Configloader
  * @requires ObjectHelper
+ * @requires ServerModule
  */
 'use strict';
 
@@ -40,6 +41,12 @@ const CFG     = require('./configloader.module');
  * @private
  */
 const OBJHELP = require('./../common/object.helper');
+/**
+ * Server Module Namespace
+ * @const {Object} SERVER
+ * @private
+ */
+const SERVER = require('./server.module');
 
 /**
  * Logfile Instance Reference
@@ -104,12 +111,12 @@ class ActsCluster {
         _logger = LOGFILE.getInstance();
         _logger.debug('initialization successfully');
 
-        this.SERVER = require('./server')(CFG, plugins);
+        this.SERVER = new SERVER(CFG, plugins, _logger);
     }
 
     /**
      * running the Cluster when Cluster Mode is enabled
-     * @function
+     * @function start
      * @param {Function} cb callback when Server is started 
      */
     start (cb) {
