@@ -28,7 +28,7 @@
   "scripts": {
     "start": "node test.js",
     "watch": "nodemon test.js",
-    "test": "istanbul cover --config=.istanbul.yml ./node_modules/jasmine-node/bin/jasmine-node ./spec/",
+    "test": "istanbul cover --config=.istanbul.yaml ./node_modules/jasmine-node/bin/jasmine-node ./spec/",
     "report": "istanbul report -v --dir report html",
     "sendsonar": "node ./sonar.js"
   }
