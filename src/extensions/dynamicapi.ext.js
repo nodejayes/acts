@@ -239,8 +239,14 @@ const readApiDirs = function (path) {
 const getFileName = function (path) {
     _logger.debug('convert url to filepath ' + path);
     let result = '';
+    let apifound = false;
     for (let i = 0; i < path.length; i++) {
-        result += path[i] + FILE.pathSep;
+        let tmpPath = path[i];
+        if (tmpPath === _cfg.server.api.routealias && !apifound) {
+            tmpPath = _cfg.server.api.routepath.split('/').join(FILE.pathSep);
+            apifound = true;
+        }
+        result += tmpPath + FILE.pathSep;
     }
     if (result.length > 2) {
         result = result.substr(0, result.length - 1) + '.js';
