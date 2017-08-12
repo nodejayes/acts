@@ -132,7 +132,7 @@ class ParserExtension {
         req.parameter = null;
         parseParameter(req);
         if (req.method !== 'GET') {
-            req.on('data', PARSER.handleData.bind({
+            req.on('data', handleData.bind({
                 'req': req,
                 'res': res,
                 'next': next

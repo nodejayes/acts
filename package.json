@@ -1,6 +1,6 @@
 {
   "name": "acts",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Acts is a Application Server that lets you easy create a Backend and Host the Client.",
   "author": {
     "name": "Markus Gilg",
