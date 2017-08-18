@@ -50,9 +50,9 @@ const parseParameter = function (req) {
     for (let i = 0; i < values.length; i++) {
         const value = values[i].split('=');
         if (value.length !== 2) {
-        continue;
+            continue;
         }
-        let escaped = SQLSTRING.escape(value[1]);
+        let escaped = SQLSTRING.escape(decodeURI(value[1]));
         escaped = escaped.substr(1, escaped.length - 2);
         result[value[0]] = escaped;
     }
