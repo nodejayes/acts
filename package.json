@@ -1,6 +1,6 @@
 {
   "name": "acts",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Acts is a Application Server that lets you easy create a Backend and Host the Client.",
   "author": {
     "name": "Markus Gilg",
@@ -11,13 +11,10 @@
   "dependencies": {
     "compression": "^1.7.0",
     "connect": "^3.6.3",
-    "debug": "^2.6.8",
     "helmet": "^3.8.1",
     "logwriter": "^1.1.2",
-    "object-sizeof": "^1.2.0",
     "socketio": "^1.0.0",
-    "sqlstring": "^2.2.0",
-    "underscore": "^1.8.3"
+    "sqlstring": "^2.2.0"
   },
   "devDependencies": {
     "istanbul": "^0.4.5",
