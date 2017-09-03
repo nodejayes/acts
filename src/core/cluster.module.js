@@ -96,6 +96,7 @@ const initClusterCores = function () {
 };
 
 let _authenticate = null;
+let _instances = [];
 
 class ActsCluster {
     constructor (workdir, cfg, plugins) {
@@ -131,15 +132,28 @@ class ActsCluster {
                     _logger.debug('clustermode active');
                     initClusterCores();
                 } else {
-                    this.SERVER.start(cb, options);
+                    _instances.push(this.SERVER.start(cb, options));
                 }
             } catch (ex) {
                 _logger.error(ex);
             }
         } else {
             _logger.debug('clustermode inactive, start one thread');
-            this.SERVER.start(cb, options);
+            _instances.push(this.SERVER.start(cb, options));
         }
+    }
+
+    /**
+     * shutdown all Server instances
+     * 
+     * @memberof ActsCluster
+     */
+    shutdownInstances () {
+        if (!_instances || _instances.length < 1) {
+            return;
+        }
+        console.info('server is shutting down...');
+        _instances.forEach(i => i.close());
     }
 
     /**

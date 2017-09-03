@@ -56,5 +56,18 @@ class Acts {
     static start (cb) {
         _instance.start(cb);
     }
+
+    /**
+     * shutdown the Server
+     * 
+     * @static
+     * @memberof Acts
+     */
+    static shutdown () {
+        if (_instance === null) {
+            return;
+        }
+        _instance.shutdownInstances();
+    }
 }
 module.exports = Acts;

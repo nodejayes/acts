@@ -223,6 +223,7 @@ const startServer = function (cb) {
         APP.use(REQU.notFound);
 
         server.listen(_cfg.server.port, _cfg.server.address, serverRunning.bind(cb));
+        return server;
     } catch (ex) {
         _logger.error(ex);
     }

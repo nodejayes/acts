@@ -9,13 +9,15 @@ describe('Authentication Specs', function () {
                 port: 8086
             }
         }, []);
-        console.info(Acts);
         Acts.authentication(function (req, res, next) {
             next();
         });
         Acts.start(function () {
-            REQ.get('http://localhost:8086/api/test', null, (a, b, c) => {
-                console.info(a, b, c);
+            REQ.get('http://localhost:8086/api/test', null, (err, resp, body) => {
+                expect(err).toBe(null);
+                expect(resp.statusCode).toBe(200);
+                expect(body).toBe('test ok');
+                Acts.shutdown();
                 done();
             });
         });
@@ -34,8 +36,11 @@ describe('Authentication Specs', function () {
             res.end();
         });
         Acts.start(function () {
-            REQ.get('http://localhost:8086/api/test', null, (a, b, c) => {
-                console.info(a, b, c);
+            REQ.get('http://localhost:8086/api/test', null, (err, resp, body) => {
+                expect(err).toBe(null);
+                expect(resp.statusCode).toBe(403);
+                expect(body).toBe('');
+                Acts.shutdown();
                 done();
             });
         });
