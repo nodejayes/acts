@@ -80,7 +80,7 @@ class FileSystemHelper {
         let result = '';
         let tmpstart = startfolder.split(PATH.sep);
         let tmpcurrent = currentfolder.split(PATH.sep);
-        if (tmpcurrent.length < tmpstart) {
+        if (tmpcurrent.length < tmpstart.length) {
             return result;
         }
         for (let i in tmpcurrent) {

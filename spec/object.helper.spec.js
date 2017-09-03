@@ -1,5 +1,7 @@
+const ASSERT = require('assert');
+
 describe('Object Helper Specs', function () {
-    const HELPER = require('./../../src/common/object.helper');
+    const HELPER = require('./../src/common/object.helper');
     let src = null;
 
     beforeEach(function () {
@@ -8,11 +10,11 @@ describe('Object Helper Specs', function () {
 
     it('add new propeties to object', function () {
         HELPER.objectCombine(src, {b:'c'});
-        expect(src).toEqual({a:'b', b:'c'});
+        ASSERT.deepEqual(src, {a:'b', b:'c'}, 'objects are not the same');
     });
 
     it('overwrite properties in object', function () {
-        HELPER.objectCombine(src, {a:'c'})
-        expect(src).toEqual({a:'c'});
+        HELPER.objectCombine(src, {a:'c'});
+        ASSERT.deepEqual(src, {a:'c'}, 'objects are not the same');
     });
 });
