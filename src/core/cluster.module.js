@@ -95,6 +95,9 @@ const initClusterCores = function () {
     CLUSTER.on('death', clusterCoreDied.bind(CLUSTER));
 };
 
+let _authenticate = null;
+let _instances = [];
+
 class ActsCluster {
     constructor (workdir, cfg, plugins) {
         // overwrite cfg from input
@@ -120,21 +123,51 @@ class ActsCluster {
      * @param {Function} cb callback when Server is started 
      */
     start (cb) {
+        let options = {
+            authentication: _authenticate
+        };
         if (CFG.server.cluster.active) {
             try {
                 if (CLUSTER.isMaster) {
                     _logger.debug('clustermode active');
                     initClusterCores();
                 } else {
-                    this.SERVER.start(cb);
+                    _instances.push(this.SERVER.start(cb, options));
                 }
             } catch (ex) {
                 _logger.error(ex);
             }
         } else {
             _logger.debug('clustermode inactive, start one thread');
-            this.SERVER.start(cb);
+            _instances.push(this.SERVER.start(cb, options));
         }
+    }
+
+    /**
+     * shutdown all Server instances
+     * 
+     * @memberof ActsCluster
+     */
+    shutdownInstances () {
+        if (!_instances || _instances.length < 1) {
+            return;
+        }
+        if (CFG.server.verbose === true) {
+            console.info('server is shutting down...');
+        }
+        _instances.forEach(i => i.close());
+        this.SERVER.shutdown();
+        _authenticate = null;
+    }
+
+    /**
+     * set the authentication method
+     * 
+     * @param {function} method 
+     * @memberof ActsCluster
+     */
+    setAuthentication (method) {
+        _authenticate = method;
     }
 }
 module.exports = ActsCluster;

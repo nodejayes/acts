@@ -7,6 +7,7 @@
  */
 module.exports = {
   server: {
+    verbose: false,
     logfile: {
       file: 'log/server.log',
       maxsize: 20,
