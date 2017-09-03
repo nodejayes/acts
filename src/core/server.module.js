@@ -87,6 +87,12 @@ const handleSsl = function () {
  * @private
  */
 const initStandardModules = function () {
+
+    // Authentication
+    if (_options !== null && typeof _options.authentication === 'function') {
+        APP.use(_options.authentication);
+    }
+
     // helmet security
     APP.use(HELM());
 
@@ -182,6 +188,8 @@ const handleCompress = function (req, res, next) {
     }
 };
 
+let _options = null;
+
 /**
  * boot the Server
  * @function startServer
@@ -231,7 +239,6 @@ class ActsServer {
         FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
         FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.websockets.socketpath));
         handleSsl();
-        initStandardModules();
     }
 
     /**
@@ -239,7 +246,9 @@ class ActsServer {
      * @function start
      * @param {Function} cb callback when Server is started
      */
-    start (cb) {
+    start (cb, opts) {
+        _options = opts || null;
+        initStandardModules();
         return startServer(cb);
     }
 }

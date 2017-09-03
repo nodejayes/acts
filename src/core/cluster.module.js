@@ -95,6 +95,8 @@ const initClusterCores = function () {
     CLUSTER.on('death', clusterCoreDied.bind(CLUSTER));
 };
 
+let _authenticate = null;
+
 class ActsCluster {
     constructor (workdir, cfg, plugins) {
         // overwrite cfg from input
@@ -120,21 +122,34 @@ class ActsCluster {
      * @param {Function} cb callback when Server is started 
      */
     start (cb) {
+        let options = {
+            authentication: _authenticate
+        };
         if (CFG.server.cluster.active) {
             try {
                 if (CLUSTER.isMaster) {
                     _logger.debug('clustermode active');
                     initClusterCores();
                 } else {
-                    this.SERVER.start(cb);
+                    this.SERVER.start(cb, options);
                 }
             } catch (ex) {
                 _logger.error(ex);
             }
         } else {
             _logger.debug('clustermode inactive, start one thread');
-            this.SERVER.start(cb);
+            this.SERVER.start(cb, options);
         }
+    }
+
+    /**
+     * set the authentication method
+     * 
+     * @param {function} method 
+     * @memberof ActsCluster
+     */
+    setAuthentication (method) {
+        _authenticate = method;
     }
 }
 module.exports = ActsCluster;
