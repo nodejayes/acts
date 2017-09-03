@@ -152,10 +152,12 @@ class ActsCluster {
         if (!_instances || _instances.length < 1) {
             return;
         }
-        console.info('server is shutting down...');
+        if (CFG.server.verbose === true) {
+            console.info('server is shutting down...');
+        }
         _instances.forEach(i => i.close());
+        this.SERVER.shutdown();
         _authenticate = null;
-        _instances = [];
     }
 
     /**

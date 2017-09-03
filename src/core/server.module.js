@@ -134,9 +134,13 @@ const initStandardModules = function () {
 const serverRunning = function () {
     let folder = 'Server Folder: ' + _cfg.serverdir;
     let server = 'Server running ' + (_cfg.server.ssl.usessl ? 'https' : 'http') + '://' + _cfg.server.address + ':' + _cfg.server.port;
-    console.info(folder);
+    if (_cfg.server.verbose === true) {
+        console.info(folder);
+    }
     _logger.info(folder);
-    console.info(server);
+    if (_cfg.server.verbose === true) {
+        console.info(server);
+    }
     _logger.info(server);
     if (typeof this === 'function') {
         this();
@@ -265,6 +269,11 @@ class ActsServer {
         return startServer(cb);
     }
 
+    /**
+     * delete all Submodules
+     * 
+     * @memberof ActsServer
+     */
     shutdown () {
         Websockets = null;
         Cors       = null;

@@ -1,3 +1,5 @@
+const ASSERT = require('assert');
+
 describe('Authentication Specs', function () {
     const REQ  = require('request');
     const validAuthentication = function (req, res, next) {
@@ -13,6 +15,7 @@ describe('Authentication Specs', function () {
         Acts = require('./../index');
         Acts.createServer(__dirname, {
             server: {
+                verbose: false,
                 address: 'localhost',
                 port: 8086
             }
@@ -28,9 +31,9 @@ describe('Authentication Specs', function () {
         Acts.authentication(validAuthentication);
         Acts.start(function () {
             REQ.get('http://localhost:8086/api/test', null, (err, resp, body) => {
-                expect(err).toBe(null);
-                expect(resp.statusCode).toBe(200);
-                expect(body).toBe('"test ok"');
+                ASSERT.equal(err, null, `error on sending response ${err === null ? null : err.message}`);
+                ASSERT.equal(resp.statusCode, 200, 'response status is not okay');
+                ASSERT.equal(JSON.parse(body), 'test ok', 'response body is not okay');
                 done();
             });
         });
@@ -40,9 +43,9 @@ describe('Authentication Specs', function () {
         Acts.authentication(invalidAuthentication);
         Acts.start(function () {
             REQ.get('http://localhost:8086/api/test', null, (err, resp, body) => {
-                expect(err).toBe(null);
-                expect(resp.statusCode).toBe(403);
-                expect(body).toBe('');
+                ASSERT.equal(err, null, `error on sending response ${err === null ? null : err.message}`);
+                ASSERT.equal(resp.statusCode, 403, 'response status is not okay');
+                ASSERT.equal(body, '', 'response body is not okay');
                 done();
             });
         });
