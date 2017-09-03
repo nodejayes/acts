@@ -20,6 +20,8 @@ const REQU = require('./../common/request.helper');
  */
 const SQLSTRING = require('sqlstring');
 
+const NOBODYREQUESTS = ['GET', 'DELETE'];
+
 /**
  * Server Configuration
  * @prop {Object} _cfg
@@ -131,7 +133,7 @@ class ParserExtension {
     parse (req, res, next) {
         req.parameter = null;
         parseParameter(req);
-        if (req.method !== 'GET') {
+        if (NOBODYREQUESTS.indexOf(req.method) === -1) {
             req.on('data', handleData.bind({
                 'req': req,
                 'res': res,
