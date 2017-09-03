@@ -15,16 +15,17 @@ const CONNECT    = require('connect');
 const IO         = require('socket.io');
 const COMPRESS   = require("compression");
 const HELM       = require("helmet");
-const WEBSOCKETS = require('./../extensions/websocket.ext');
-const CORS       = require("./../extensions/cors.ext");
-const BODYPARSER = require("./../extensions/parser.ext");
-const REDIRECT   = require("./../extensions/redirect.ext");
-const STATICFILE = require("./../extensions/staticfiles.ext");
-const DYNAMICAPI = require("./../extensions/dynamicapi.ext");
-const ACCESS     = require("./../extensions/accesshandler.ext");
-const FILE       = require('./../common/filesystem.helper');
-const REQU       = require('./../common/request.helper');
-const APP        = CONNECT();
+
+let Websockets = null;
+let Cors       = null;
+let BodyParser = null;
+let Redirect   = null;
+let StaticFile = null;
+let DynamicApi = null;
+let Access     = null;
+let FileSys    = null;
+let Request    = null;
+let App        = null;
 
 let _cfg        = null;
 let _core       = null;
@@ -71,12 +72,12 @@ const handleSsl = function () {
         const cas = [];
         for (var i = 0, len = _cfg.server.ssl.certificationauthority.length; i < len; i++) {
             const obj = _cfg.server.ssl.certificationauthority[i];
-            cas.push(FILE.getFileContent(obj));
+            cas.push(FileSys.getFileContent(obj));
         }
         _ssloptions = {
             ca: cas,
-            cert: FILE.getFileContent(_cfg.server.ssl.certificate),
-            key: FILE.getFileContent(_cfg.server.ssl.privatekey)
+            cert: FileSys.getFileContent(_cfg.server.ssl.certificate),
+            key: FileSys.getFileContent(_cfg.server.ssl.privatekey)
         };
     }
 };
@@ -90,39 +91,39 @@ const initStandardModules = function () {
 
     // Authentication
     if (_options !== null && typeof _options.authentication === 'function') {
-        APP.use(_options.authentication);
+        App.use(_options.authentication);
     }
 
     // helmet security
-    APP.use(HELM());
+    App.use(HELM());
 
-    // CORS Module first
-    let tmpCors = new CORS(_cfg, _logger);
-    APP.use(tmpCors.checkRequest);
+    // Cors Module first
+    let tmpCors = new Cors(_cfg, _logger);
+    App.use(tmpCors.checkRequest);
 
     // load redirect module
-    let tmpRedirect = new REDIRECT(_cfg, _logger);
-    APP.use(tmpRedirect.handle);
+    let tmpRedirect = new Redirect(_cfg, _logger);
+    App.use(tmpRedirect.handle);
 
     // parse request bodys
-    let tmpParser = new BODYPARSER(_cfg, _logger);
-    APP.use(tmpParser.parse);
+    let tmpParser = new BodyParser(_cfg, _logger);
+    App.use(tmpParser.parse);
 
     // gzip compression
     if (_cfg.server.compress) {
-        APP.use(handleCompress);
+        App.use(handleCompress);
     }
 
     // load plugins
-    loadPlugins(_plugins, APP, _cfg);
+    loadPlugins(_plugins, App, _cfg);
 
     // use folder for static files from config file
-    let tmpStaticFile = new STATICFILE(_cfg, _logger);
-    APP.use(tmpStaticFile.request);
+    let tmpStaticFile = new StaticFile(_cfg, _logger);
+    App.use(tmpStaticFile.request);
 
     // use dynamic api
-    let tmpDynamicApi = new DYNAMICAPI(_cfg, _logger);
-    APP.use(tmpDynamicApi.request);
+    let tmpDynamicApi = new DynamicApi(_cfg, _logger);
+    App.use(tmpDynamicApi.request);
 };
 
 /**
@@ -202,16 +203,16 @@ const startServer = function (cb) {
         let server;
         if (_cfg.server.ssl.usessl) {
             _logger.debug('ssl was enabled', _ssloptions);
-            server = _http.createServer(_ssloptions, APP);
+            server = _http.createServer(_ssloptions, App);
         } else {
-            server = _http.createServer(APP);
+            server = _http.createServer(App);
         }
 
         // create sockets
         if (_cfg.server.websockets.usewebsockets && _socketio === null) {
             _logger.debug('websockets was enabled');
             _socketio = IO(server);
-            let tmpWebsockets = new WEBSOCKETS(_cfg, _logger);
+            let tmpWebsockets = new Websockets(_cfg, _logger);
             _socketio.on('connection', tmpWebsockets.setEventsOnSocket);
         }
 
@@ -220,7 +221,7 @@ const startServer = function (cb) {
         server.on('close', handleServerClose);
         server.on('connection', handleClientConnect);
 
-        APP.use(REQU.notFound);
+        App.use(Request.notFound);
 
         server.listen(_cfg.server.port, _cfg.server.address, serverRunning.bind(cb));
         return server;
@@ -231,14 +232,25 @@ const startServer = function (cb) {
 
 class ActsServer {
     constructor (cfg, plugins, logger) {
+        Websockets = require('./../extensions/websocket.ext');
+        Cors       = require("./../extensions/cors.ext");
+        BodyParser = require("./../extensions/parser.ext");
+        Redirect   = require("./../extensions/redirect.ext");
+        StaticFile = require("./../extensions/staticfiles.ext");
+        DynamicApi = require("./../extensions/dynamicapi.ext");
+        Access     = require("./../extensions/accesshandler.ext");
+        FileSys    = require('./../common/filesystem.helper');
+        Request    = require('./../common/request.helper');
+        App        = CONNECT();
+
         _logger = logger;
         _cfg = cfg;
         _plugins = plugins;
-        _access = new ACCESS(_cfg, _logger);
+        _access = new Access(_cfg, _logger);
 
-        FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.webroot));
-        FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
-        FILE.createDirectoryRecursive(FILE.joinPath(_cfg.serverdir, _cfg.server.websockets.socketpath));
+        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.webroot));
+        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
+        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.websockets.socketpath));
         handleSsl();
     }
 
@@ -251,6 +263,19 @@ class ActsServer {
         _options = opts || null;
         initStandardModules();
         return startServer(cb);
+    }
+
+    shutdown () {
+        Websockets = null;
+        Cors       = null;
+        BodyParser = null;
+        Redirect   = null;
+        StaticFile = null;
+        DynamicApi = null;
+        Access     = null;
+        FileSys    = null;
+        Request    = null;
+        App        = null;
     }
 }
 module.exports = ActsServer;

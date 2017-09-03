@@ -154,6 +154,8 @@ class ActsCluster {
         }
         console.info('server is shutting down...');
         _instances.forEach(i => i.close());
+        _authenticate = null;
+        _instances = [];
     }
 
     /**
