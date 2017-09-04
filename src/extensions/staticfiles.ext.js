@@ -36,34 +36,16 @@ const FILETYPES = require('./../meta/filetypes.json');
 
 /**
  * Shortcut for Root Directory
- * @prop {String} _root
+ * @const {String} ROOT
  * @private
  */
-let _root = '.' + FILE.pathSep;
-/**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
+const ROOT = '.' + FILE.pathSep;
 /**
  * static Webpage Extensions
- * @prop {Array} _webpageextensions
+ * @const {Array} WEBPAGEEXTENSIONS
  * @private
  */
-let _webpageextensions = ['.js', '.html', '.xhtml', '.jpeg', '.jpg', '.png', '.bmp', '.css', '.ico'];
-/**
- * result of allowed Extensions
- * @prop {Array} _tmpextensions
- * @private
- */
-let _tmpextensions = [];
+const WEBPAGEEXTENSIONS = ['.js', '.html', '.xhtml', '.jpeg', '.jpg', '.png', '.bmp', '.css', '.ico'];
 
 /**
  * fills the extension array for keyword webpage
@@ -88,8 +70,8 @@ const fillWebpageFilter = function (webpageextensions, tmpextensions) {
  * @param {Integer} i 
  */
 const fillOtherExtensions = function (tmpextensions, i) {
-    if (tmpextensions.indexOf(_cfg.server.allowedExtensions[i]) === -1) {
-        tmpextensions.push(_cfg.server.allowedExtensions[i]);
+    if (tmpextensions.indexOf(this.privates.cfg.server.allowedExtensions[i]) === -1) {
+        tmpextensions.push(this.privates.cfg.server.allowedExtensions[i]);
     }
 };
 
@@ -127,7 +109,7 @@ const phpClose = function (code, response) {
  * @return {Boolean} allowed?
  */
 const checkExtension = function (extension) {
-    if (_cfg.server.allowedExtensions.indexOf(extension) === -1) {
+    if (this.privates.cfg.server.allowedExtensions.indexOf(extension) === -1) {
         return false;
     }
     return true;
@@ -150,19 +132,22 @@ const getContentType = function (extension) {
 
 class StaticFileExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            cfg: cfg,
+            logger: logger,
+            tmpextensions: []
+        };
 
         // fill extension list
-        for (var i = 0; i < _cfg.server.allowedExtensions.length; i++) {
-            const curr = _cfg.server.allowedExtensions[i];
+        for (var i = 0; i < this.privates.cfg.server.allowedExtensions.length; i++) {
+            const curr = this.privates.cfg.server.allowedExtensions[i];
             if (curr === 'webpage') {
-                fillWebpageFilter(_webpageextensions, _tmpextensions);
+                fillWebpageFilter(WEBPAGEEXTENSIONS, this.privates.tmpextensions);
             } else {
-                fillOtherExtensions(_tmpextensions, i);
+                fillOtherExtensions.bind(this)(this.privates.tmpextensions, i);
             }
         }
-        _cfg.server.allowedExtensions = _tmpextensions;
+        this.privates.cfg.server.allowedExtensions = this.privates.tmpextensions;
     }
 
     /**
@@ -173,25 +158,25 @@ class StaticFileExtension {
      * @param {Function} next Connect next Callback 
      */
     request (req, res, next) {
-        let filepath = _root + _cfg.server.webroot + req.url.split('/').join(FILE.pathSep).trim();
-        const absolutepath = FILE.joinPath(_cfg.serverdir, _cfg.server.webroot, req.url.split('/').join(FILE.pathSep)).trim();
-        _logger.debug('request ' + absolutepath);
+        let filepath = ROOT + this.privates.cfg.server.webroot + req.url.split('/').join(FILE.pathSep).trim();
+        const absolutepath = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, req.url.split('/').join(FILE.pathSep)).trim();
+        this.privates.logger.debug('request ' + absolutepath);
         // correct root with index.html
-        if (filepath === _root + _cfg.server.webroot + FILE.pathSep) {
-            filepath = _root + _cfg.server.webroot + FILE.pathSep + 'index.html';
+        if (filepath === ROOT + this.privates.cfg.server.webroot + FILE.pathSep) {
+            filepath = ROOT + this.privates.cfg.server.webroot + FILE.pathSep + 'index.html';
         }
         try {
             const extension = FILE.extname(filepath);
-            if (!checkExtension(extension)) {
-                _logger.warning('file extension not allowed');
+            if (!checkExtension.bind(this)(extension)) {
+                this.privates.logger.warning('file extension not allowed');
                 next();
                 return;
             }
             const contenttype = getContentType(extension);
-            _logger.debug('contenttype is ' + contenttype);
-            if (_cfg.server.phppath && contenttype === 'application/x-httpd-php') {
+            this.privates.logger.debug('contenttype is ' + contenttype);
+            if (this.privates.cfg.server.phppath && contenttype === 'application/x-httpd-php') {
                 // works only with absolute path
-                const php = new PROC(_cfg.server.phppath, [absolutepath]);
+                const php = new PROC(this.privates.cfg.server.phppath, [absolutepath]);
                 php.onOut = phpFinish;
                 php.onClose = phpClose;
                 php.execute(res);
@@ -199,9 +184,9 @@ class StaticFileExtension {
             }
             const content = FILE.getFileContent(filepath);
             REQU.okWithData(req, res, contenttype, content);
-            _logger.debug('sending file: ' + filepath);
+            this.privates.logger.debug('sending file: ' + filepath);
         } catch (ex) {
-            _logger.error(ex);
+            this.privates.logger.error(ex);
             next();
         }
     }

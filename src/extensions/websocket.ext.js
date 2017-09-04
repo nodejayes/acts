@@ -9,37 +9,24 @@
 
 /**
  * File System Helper Reference
- * @const {Object} FILE
+ * @const {object} FILE
  * @private
  */
 const FILE  = require('./../common/filesystem.helper');
 /**
  * Socket Cache Reference
- * @const {Object} CACHE
+ * @const {object} CACHE
  * @private
  */
 const CACHE = require('./../common/socketcache.helper');
 
 /**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-
-/**
  * read all Websocket Events
  * @function readEvents
  * @private
- * @param {Object} socket Node Socket Object
- * @param {String} path current path
- * @param {String} startfolder parent folder 
+ * @param {object} socket Node Socket Object
+ * @param {string} path current path
+ * @param {string} startfolder parent folder 
  */
 const readEvents = function (socket, path, startfolder) {
     startfolder = !startfolder ? path : startfolder;
@@ -49,15 +36,15 @@ const readEvents = function (socket, path, startfolder) {
         const file = FILE.joinPath(path, filename);
         const stat = FILE.getStats(file);
         if (stat.isDirectory()) {
-            _logger.debug('jump into folder ' + file);
-            readEvents(socket, file, startfolder);
+            this.privates.logger.debug('jump into folder ' + file);
+            readEvents.bind(this)(socket, file, startfolder);
         } else {
             // Extension must be .js
             if (FILE.extname(filename) !== '.js') {
                 continue;
             }
             var registerName = FILE.folderDiff(startfolder, path) + FILE.basename(filename, '.js');
-            _logger.debug('register event from ' + file + ' as ' + registerName);
+            this.privates.logger.debug('register event from ' + file + ' as ' + registerName);
             socket.on(registerName, require(file));
         }
     }
@@ -65,30 +52,42 @@ const readEvents = function (socket, path, startfolder) {
 
 class WebsocketExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            /**
+             * Server Configuration
+             * @prop {object} cfg
+             * @private
+             */
+            cfg: cfg,
+            /**
+             * Logwriter Instance
+             * @prop {object} logger
+             * @private
+             */
+            logger: logger
+        };
     }
 
     /**
      * add Socket to Cache and Register Websocket Events
      * @function setEventsOnSocket
-     * @param {Object} socket Node Socket Object 
+     * @param {object} socket Node Socket Object 
      */
     setEventsOnSocket (socket) {
-        if (!_cfg.serverdir) {
+        if (!this.privates.cfg.serverdir) {
             return;
         }
-        _logger.debug("register socket in cache " + socket.id);
+        this.privates.logger.debug("register socket in cache " + socket.id);
         CACHE.addSocketIfNotExists(socket);
         socket.on("close", function (err) {
             if (err) {
-                _logger.error(err);
+                this.privates.logger.error(err);
             }
-            _logger.debug("remove socket from cache " + this.id);
+            this.privates.logger.debug("remove socket from cache " + this.id);
             CACHE.removeSocket(this);
         });
-        _logger.debug("begin to register socket events");
-        readEvents(socket, FILE.joinPath(_cfg.serverdir, _cfg.server.websockets.socketpath));
+        this.privates.logger.debug("begin to register socket events");
+        readEvents.bind(this)(socket, FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.websockets.socketpath));
     }
 }
 module.exports = WebsocketExtension;

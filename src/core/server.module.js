@@ -13,28 +13,18 @@
 
 const CONNECT    = require('connect');
 const IO         = require('socket.io');
-const COMPRESS   = require("compression");
-const HELM       = require("helmet");
+const COMPRESS   = require('compression');
+const HELM       = require('helmet');
 
-let Websockets = null;
-let Cors       = null;
-let BodyParser = null;
-let Redirect   = null;
-let StaticFile = null;
-let DynamicApi = null;
-let Access     = null;
-let FileSys    = null;
-let Request    = null;
-let App        = null;
-
-let _cfg        = null;
-let _core       = null;
-let _logger     = null;
-let _socketio   = null;
-let _ssloptions = null;
-let _plugins    = null;
-let _http       = require('http');
-let _access     = null;
+const FileSys     = require('./../common/filesystem.helper');
+const Request     = require('./../common/request.helper');
+const Websocket   = require('./../extensions/websocket.ext');
+const Cors        = require('./../extensions/cors.ext');
+const BodyParser  = require('./../extensions/parser.ext');
+const Redirect    = require('./../extensions/redirect.ext');
+const StaticFile  = require('./../extensions/staticfiles.ext');
+const DynamicApi  = require('./../extensions/dynamicapi.ext');
+const Access      = require('./../extensions/accesshandler.ext');
 
 /**
  * try to load all Plugins
@@ -46,17 +36,17 @@ let _access     = null;
  */
 const loadPlugins = function (plugins, server, cfg) {
     if (typeof plugins !== typeof [] || plugins.length < 1) {
-        _logger.debug("no plugins loaded");
+        this.privates.logger.debug('no plugins loaded');
         return;
     }
     for (let i = 0, length = plugins.length; i < length; i++) {
         const plugin = plugins[i];
         try {
             require(plugin)(server, cfg);
-            _logger.debug("plugin " + plugin + " successfully loaded");
+            this.privates.logger.debug('plugin ' + plugin + ' successfully loaded');
         } catch (err) {
-            _logger.debug("error while load plugin " + plugin);
-            _logger.error(err);
+            this.privates.logger.debug('error while load plugin ' + plugin);
+            this.privates.logger.error(err);
         }
     }
 };
@@ -67,17 +57,17 @@ const loadPlugins = function (plugins, server, cfg) {
  * @private
  */
 const handleSsl = function () {
-    if (_cfg.server.ssl.usessl) {
-        _http = require('https');
+    if (this.privates.cfg.server.ssl.usessl) {
+        this.privates.http = require('https');
         const cas = [];
-        for (var i = 0, len = _cfg.server.ssl.certificationauthority.length; i < len; i++) {
-            const obj = _cfg.server.ssl.certificationauthority[i];
+        for (var i = 0, len = this.privates.cfg.server.ssl.certificationauthority.length; i < len; i++) {
+            const obj = this.privates.cfg.server.ssl.certificationauthority[i];
             cas.push(FileSys.getFileContent(obj));
         }
-        _ssloptions = {
+        this.privates.ssloptions = {
             ca: cas,
-            cert: FileSys.getFileContent(_cfg.server.ssl.certificate),
-            key: FileSys.getFileContent(_cfg.server.ssl.privatekey)
+            cert: FileSys.getFileContent(this.privates.cfg.server.ssl.certificate),
+            key: FileSys.getFileContent(this.privates.cfg.server.ssl.privatekey)
         };
     }
 };
@@ -90,40 +80,40 @@ const handleSsl = function () {
 const initStandardModules = function () {
 
     // Authentication
-    if (_options !== null && typeof _options.authentication === 'function') {
-        App.use(_options.authentication);
+    if (this.privates.options !== null && typeof this.privates.options.authentication === 'function') {
+        this.privates.app.use(this.privates.options.authentication);
     }
 
     // helmet security
-    App.use(HELM());
+    this.privates.app.use(HELM());
 
     // Cors Module first
-    let tmpCors = new Cors(_cfg, _logger);
-    App.use(tmpCors.checkRequest);
+    let tmpCors = new Cors(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(tmpCors.checkRequest.bind(tmpCors));
 
     // load redirect module
-    let tmpRedirect = new Redirect(_cfg, _logger);
-    App.use(tmpRedirect.handle);
+    let tmpRedirect = new Redirect(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(tmpRedirect.handle.bind(tmpRedirect));
 
     // parse request bodys
-    let tmpParser = new BodyParser(_cfg, _logger);
-    App.use(tmpParser.parse);
+    let tmpParser = new BodyParser(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(tmpParser.parse.bind(tmpParser));
 
     // gzip compression
-    if (_cfg.server.compress) {
-        App.use(handleCompress);
+    if (this.privates.cfg.server.compress) {
+        this.privates.app.use(handleCompress.bind(this));
     }
 
     // load plugins
-    loadPlugins(_plugins, App, _cfg);
+    loadPlugins.bind(this)(this.privates.plugins, this.privates.app, this.privates.cfg);
 
     // use folder for static files from config file
-    let tmpStaticFile = new StaticFile(_cfg, _logger);
-    App.use(tmpStaticFile.request);
+    let tmpStaticFile = new StaticFile(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(tmpStaticFile.request.bind(tmpStaticFile));
 
     // use dynamic api
-    let tmpDynamicApi = new DynamicApi(_cfg, _logger);
-    App.use(tmpDynamicApi.request);
+    let tmpDynamicApi = new DynamicApi(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(tmpDynamicApi.request.bind(tmpDynamicApi));
 };
 
 /**
@@ -132,18 +122,18 @@ const initStandardModules = function () {
  * @private
  */
 const serverRunning = function () {
-    let folder = 'Server Folder: ' + _cfg.serverdir;
-    let server = 'Server running ' + (_cfg.server.ssl.usessl ? 'https' : 'http') + '://' + _cfg.server.address + ':' + _cfg.server.port;
-    if (_cfg.server.verbose === true) {
+    let folder = 'Server Folder: ' + this.class.privates.cfg.serverdir;
+    let server = 'Server running ' + (this.class.privates.cfg.server.ssl.usessl ? 'https' : 'http') + '://' + this.class.privates.cfg.server.address + ':' + this.class.privates.cfg.server.port;
+    if (this.class.privates.cfg.server.verbose === true) {
         console.info(folder);
     }
-    _logger.info(folder);
-    if (_cfg.server.verbose === true) {
+    this.class.privates.logger.info(folder);
+    if (this.class.privates.cfg.server.verbose === true) {
         console.info(server);
     }
-    _logger.info(server);
-    if (typeof this === 'function') {
-        this();
+    this.class.privates.logger.info(server);
+    if (typeof this.method === 'function') {
+        this.method();
     }
 };
 
@@ -154,8 +144,8 @@ const serverRunning = function () {
  * @param {Object} socket Node Socket Object 
  */
 const handleClientConnect = function (socket) {
-    _logger.debug('socket connect ' + socket.remoteAddress);
-    _access.onClientConnect(socket);
+    this.privates.logger.debug('socket connect ' + socket.remoteAddress);
+    this.privates.accessInstance.onClientConnect(socket);
 };
 
 /**
@@ -166,8 +156,8 @@ const handleClientConnect = function (socket) {
  * @param {Object} socket Node Socket Object 
  */
 const handleClientError = function (err, socket) {
-    _logger.debug('client create a error');
-    _logger.warning(err);
+    this.privates.logger.debug('client create a error');
+    this.privates.logger.warning(err);
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
 };
 
@@ -177,7 +167,7 @@ const handleClientError = function (err, socket) {
  * @private
  */
 const handleServerClose = function () {
-  _logger.debug('server is shutting down');
+  //this.privates.logger.debug('server is shutting down');
 };
 
 /**
@@ -187,13 +177,11 @@ const handleServerClose = function () {
  */
 const handleCompress = function (req, res, next) {
     if (req.headers['accept-encoding'] === 'compress, gzip') {
-        COMPRESS(_cfg)(req, res, next);
+        COMPRESS(this.privates.cfg)(req, res, next);
     } else {
         next();
     }
 };
-
-let _options = null;
 
 /**
  * boot the Server
@@ -201,61 +189,59 @@ let _options = null;
  * @param {Function} cb callback when Server is started
  */
 const startServer = function (cb) {
-    _logger.debug('try to start server');
+    this.privates.logger.debug('try to start server');
     try {
         //start Server
         let server;
-        if (_cfg.server.ssl.usessl) {
-            _logger.debug('ssl was enabled', _ssloptions);
-            server = _http.createServer(_ssloptions, App);
+        if (this.privates.cfg.server.ssl.usessl) {
+            this.privates.logger.debug('ssl was enabled', this.privates.ssloptions);
+            server = this.privates.http.createServer(this.privates.ssloptions, this.privates.app);
         } else {
-            server = _http.createServer(App);
+            server = this.privates.http.createServer(this.privates.app);
         }
 
         // create sockets
-        if (_cfg.server.websockets.usewebsockets && _socketio === null) {
-            _logger.debug('websockets was enabled');
-            _socketio = IO(server);
-            let tmpWebsockets = new Websockets(_cfg, _logger);
-            _socketio.on('connection', tmpWebsockets.setEventsOnSocket);
+        if (this.privates.cfg.server.websockets.usewebsockets && this.privates.socketio === null) {
+            this.privates.logger.debug('websockets was enabled');
+            this.privates.socketio = IO(server);
+            let tmpWebsockets = new Websockets(this.privates.cfg, this.privates.logger);
+            this.privates.socketio.on('connection', tmpWebsockets.setEventsOnSocket);
         }
 
         // handle Server Events
-        server.on('clientError', handleClientError);
-        server.on('close', handleServerClose);
-        server.on('connection', handleClientConnect);
+        server.on('clientError', handleClientError.bind(this));
+        server.on('close', handleServerClose.bind(this));
+        server.on('connection', handleClientConnect.bind(this));
 
-        App.use(Request.notFound);
+        this.privates.app.use(Request.notFound);
 
-        server.listen(_cfg.server.port, _cfg.server.address, serverRunning.bind(cb));
+        server.listen(this.privates.cfg.server.port, this.privates.cfg.server.address, serverRunning.bind({
+            method: cb,
+            class: this
+        }));
         return server;
     } catch (ex) {
-        _logger.error(ex);
+        this.privates.logger.error(ex);
     }
 };
 
 class ActsServer {
     constructor (cfg, plugins, logger) {
-        Websockets = require('./../extensions/websocket.ext');
-        Cors       = require("./../extensions/cors.ext");
-        BodyParser = require("./../extensions/parser.ext");
-        Redirect   = require("./../extensions/redirect.ext");
-        StaticFile = require("./../extensions/staticfiles.ext");
-        DynamicApi = require("./../extensions/dynamicapi.ext");
-        Access     = require("./../extensions/accesshandler.ext");
-        FileSys    = require('./../common/filesystem.helper');
-        Request    = require('./../common/request.helper');
-        App        = CONNECT();
+        this.privates = {
+            app: CONNECT(),
+            http: require('http'),
+            logger: logger,
+            cfg: cfg,
+            plugins: plugins,
+            accessInstance: new Access(cfg, logger),
+            socketio: null,
+            ssloptions: null
+        }
 
-        _logger = logger;
-        _cfg = cfg;
-        _plugins = plugins;
-        _access = new Access(_cfg, _logger);
-
-        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.webroot));
-        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
-        FileSys.createDirectoryRecursive(FileSys.joinPath(_cfg.serverdir, _cfg.server.websockets.socketpath));
-        handleSsl();
+        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.webroot));
+        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.api.routepath));
+        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.websockets.socketpath));
+        handleSsl.bind(this)();
     }
 
     /**
@@ -264,9 +250,9 @@ class ActsServer {
      * @param {Function} cb callback when Server is started
      */
     start (cb, opts) {
-        _options = opts || null;
-        initStandardModules();
-        return startServer(cb);
+        this.privates.options = opts || null;
+        initStandardModules.bind(this)();
+        return startServer.bind(this)(cb);
     }
 
     /**
@@ -275,16 +261,7 @@ class ActsServer {
      * @memberof ActsServer
      */
     shutdown () {
-        Websockets = null;
-        Cors       = null;
-        BodyParser = null;
-        Redirect   = null;
-        StaticFile = null;
-        DynamicApi = null;
-        Access     = null;
-        FileSys    = null;
-        Request    = null;
-        App        = null;
+        delete this.privates;
     }
 }
 module.exports = ActsServer;

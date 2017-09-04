@@ -14,27 +14,14 @@
 const REQU = require('./../common/request.helper');
 
 /**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-
-/**
  * returns the Server Address
  * @function getServerAddress
  * @private
  * @return {String} url
  */
 const getServerAddress = function () {
-    return (_cfg.server.ssl.usessl ? 'https://' : 'http://') +
-        _cfg.server.address + ':' + _cfg.server.port;
+    return (this.privates.cfg.server.ssl.usessl ? 'https://' : 'http://') +
+        this.privates.cfg.server.address + ':' + this.privates.cfg.server.port;
 };
 
 /**
@@ -144,19 +131,19 @@ const fixRoute = function (url, target) {
  */
 const lookingRedirect = function (req, res, rules) {
     let target;
-    _logger.debug('server is ' + getServerAddress());
+    this.privates.logger.debug('server is ' + getServerAddress.bind(this)());
     for (const i in rules) {
         if (rules.hasOwnProperty(i)) {
             const rule = rules[i];
-            _logger.debug('check rule ' + i + ' => ' + req.url + ' switch to ' + rule);
+            this.privates.logger.debug('check rule ' + i + ' => ' + req.url + ' switch to ' + rule);
             if (isAbsolute(i) && isRouteExact(req.url, i)) {
-                target = getServerAddress() + rule;
-                _logger.debug('rule redirect to ' + target);
+                target = getServerAddress.bind(this)() + rule;
+                this.privates.logger.debug('rule redirect to ' + target);
                 REQU.redirect(req, res, target);
                 return true;
             } else if (!isAbsolute(i) && isRouteAny(req.url, i)) {
-                target = getServerAddress() + fixRoute(req.url, rule);
-                _logger.debug('rule redirect to ' + target);
+                target = getServerAddress.bind(this)() + fixRoute(req.url, rule);
+                this.privates.logger.debug('rule redirect to ' + target);
                 REQU.redirect(req, res, target);
                 return true;
             }
@@ -174,9 +161,9 @@ const lookingRedirect = function (req, res, rules) {
  * @return {Boolean} redirect?
  */
 const redirectHttps = function (req, res) {
-  if (_cfg.server.ssl.usessl && _cfg.server.ssl.redirectnonsslrequests && !req.socket.encrypted) {
-    const target = getServerAddress() + req.url;
-    _logger.debug('https redirect to ' + target);
+  if (this.privates.cfg.server.ssl.usessl && this.privates.cfg.server.ssl.redirectnonsslrequests && !req.socket.encrypted) {
+    const target = getServerAddress.bind(this)() + req.url;
+    this.privates.logger.debug('https redirect to ' + target);
     REQU.redirect(req, res, target);
     return true;
   }
@@ -185,8 +172,10 @@ const redirectHttps = function (req, res) {
 
 class RedirectExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            cfg: cfg,
+            logger: logger
+        };
     }
 
     /**
@@ -197,13 +186,13 @@ class RedirectExtension {
      * @param {Object} next Connect next Callback
      */
     handle (req, res, next) {
-        if (redirectHttps(req, res)) {
+        if (redirectHttps.bind(this)(req, res)) {
             return;
         }
-        if (lookingRedirect(req, res, _cfg.redirectrules)) {
+        if (lookingRedirect.bind(this)(req, res, this.privates.cfg.redirectrules)) {
             return;
         }
-        _logger.debug('no redirect rule found');
+        this.privates.logger.debug('no redirect rule found');
         next();
     }
 }

@@ -49,20 +49,13 @@ const OBJHELP = require('./../common/object.helper');
 const SERVER = require('./server.module');
 
 /**
- * Logfile Instance Reference
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-
-/**
  * restart Cluster Core when died
  * @event clusterCoreDied 
  * @private
  */
 const clusterCoreDied = function (worker) {
-  _logger.debug('worker ' + worker.process.pid + ' died, try to restart...');
-  this.fork();
+  this.privates.logger.debug('worker ' + worker.process.pid + ' died, try to restart...');
+  this.original.fork();
 };
 
 /**
@@ -71,7 +64,7 @@ const clusterCoreDied = function (worker) {
  * @private
  */
 const clusterCoreOnline = function (worker) {
-  _logger.info('worker ' + worker.process.pid + ' is online');
+    this.privates.logger.info('worker ' + worker.process.pid + ' is online');
 };
 
 /**
@@ -83,20 +76,20 @@ const initClusterCores = function () {
     // take config cores or cpu cores when config cores bigger
     const cpus = CFG.server.cluster.worker > OS.cpus().length ? OS.cpus().length : CFG.server.cluster.worker;
     if (cpus < CFG.server.cluster.worker) {
-        _logger.info('to many workers reduce to cpu count');
+        this.privates.logger.info('to many workers reduce to cpu count');
     }
-    _logger.debug('i want to start ' + cpus + ' worker');
+    this.privates.logger.debug('i want to start ' + cpus + ' worker');
 
     for (let i = 0; i < cpus; i++) {
         CLUSTER.fork();
     }
 
-    CLUSTER.on('online', clusterCoreOnline);
-    CLUSTER.on('death', clusterCoreDied.bind(CLUSTER));
+    CLUSTER.on('online', clusterCoreOnline.bind(this));
+    CLUSTER.on('death', clusterCoreDied.bind({
+        original: CLUSTER,
+        privates: this.privates
+    }));
 };
-
-let _authenticate = null;
-let _instances = [];
 
 class ActsCluster {
     constructor (workdir, cfg, plugins) {
@@ -106,15 +99,20 @@ class ActsCluster {
         }
         CFG.serverdir = workdir;
 
-        LOGFILE.init({
+        let log = new LOGFILE({
             logfilepath: CFG.server.logfile.file,
             maxfilesize: CFG.server.logfile.maxsize,
             loglevel: CFG.server.logfile.level
         });
-        _logger = LOGFILE.getInstance();
-        _logger.debug('initialization successfully');
+        log.init();
+        this.privates = {
+            logger: log.getInstance(),
+            authenticate: null,
+            instances: []
+        };
+        this.privates.logger.debug('initialization successfully');
 
-        this.SERVER = new SERVER(CFG, plugins, _logger);
+        this.SERVER = new SERVER(CFG, plugins, this.privates.logger);
     }
 
     /**
@@ -124,22 +122,22 @@ class ActsCluster {
      */
     start (cb) {
         let options = {
-            authentication: _authenticate
+            authentication: this.privates.authenticate
         };
         if (CFG.server.cluster.active) {
             try {
                 if (CLUSTER.isMaster) {
-                    _logger.debug('clustermode active');
-                    initClusterCores();
+                    this.privates.logger.debug('clustermode active');
+                    initClusterCores.bind(this)();
                 } else {
-                    _instances.push(this.SERVER.start(cb, options));
+                    this.privates.instances.push(this.SERVER.start(cb, options));
                 }
             } catch (ex) {
-                _logger.error(ex);
+                this.privates.logger.error(ex);
             }
         } else {
-            _logger.debug('clustermode inactive, start one thread');
-            _instances.push(this.SERVER.start(cb, options));
+            this.privates.logger.debug('clustermode inactive, start one thread');
+            this.privates.instances.push(this.SERVER.start(cb, options));
         }
     }
 
@@ -149,15 +147,15 @@ class ActsCluster {
      * @memberof ActsCluster
      */
     shutdownInstances () {
-        if (!_instances || _instances.length < 1) {
+        if (!this.privates.instances || this.privates.instances.length < 1) {
             return;
         }
         if (CFG.server.verbose === true) {
             console.info('server is shutting down...');
         }
-        _instances.forEach(i => i.close());
+        this.privates.instances.forEach(i => i.close());
         this.SERVER.shutdown();
-        _authenticate = null;
+        this.privates.authenticate = null;
     }
 
     /**
@@ -167,7 +165,7 @@ class ActsCluster {
      * @memberof ActsCluster
      */
     setAuthentication (method) {
-        _authenticate = method;
+        this.privates.authenticate = method;
     }
 }
 module.exports = ActsCluster;

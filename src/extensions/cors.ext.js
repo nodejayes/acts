@@ -8,19 +8,6 @@
 const REQU = require('./../common/request.helper');
 
 /**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-
-/**
  * Handle a CORS Request
  * @function checkRequest
  * @param {Object} req the NodeJs Request Object
@@ -29,25 +16,25 @@ let _logger = null;
  */
 const checkRequest = function (req, res, next) {
     if (req.method !== 'OPTIONS') {
-        _logger.warning('request has no OPTIONS Method CORS Check Skip');
+        this.privates.logger.warning('request has no OPTIONS Method CORS Check Skip');
         next();
         return;
     }
-    _logger.debug('check request for cors ' + req.path);
-    if (!_cfg.server.cors.enabled) {
-        _logger.warning('CORS is disabled');
+    this.privates.logger.debug('check request for cors ' + req.path);
+    if (!this.privates.cfg.server.cors.enabled) {
+        this.privates.logger.warning('CORS is disabled');
         REQU.ok(req, res);
         return;
     }
 
-    const opt = _cfg.server.cors.default;
+    const opt = this.privates.cfg.server.cors.default;
     for (const x in opt) {
         if (opt.hasOwnProperty(x)) {
             const headerdescription = getHeader(x);
             if (headerdescription === null) {
                 continue;
             }
-            _logger.debug('set CORS header ' + headerdescription + ' = ' + opt[x].toString());
+            this.privates.logger.debug('set CORS header ' + headerdescription + ' = ' + opt[x].toString());
             res.setHeader(headerdescription, opt[x].toString());
         }
     }
@@ -78,12 +65,14 @@ const getHeader = function (des) {
 
 class CorsExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            cfg: cfg,
+            logger: logger
+        };
     }
 
     checkRequest (req, res, next) {
-        return checkRequest(req, res, next);
+        return checkRequest.bind(this)(req, res, next);
     }
 }
 module.exports = CorsExtension;

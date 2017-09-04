@@ -14,55 +14,6 @@
 const EXEC = require('child_process').spawn;
 
 /**
- * path to processfile
- * @prop {String}
- * @private
- */
-let _processpath = null;
-/**
- * process arguments
- * @prop {Array}
- * @private
- */
-let _arguments   = null;
-/**
- * Node Spawn Object
- * @prop {Object}
- * @private
- */
-let _instance    = null;
-/**
- * Node Response Object
- * @prop {Object}
- * @private
- */
-let _response    = null;
-/**
- * contenttype of response
- * @prop {String}
- * @private
- */
-let _contenttype = null;
-/**
- * inner on process out eventhandler
- * @prop {String}
- * @private
- */
-let _onOut       = null;
-/**
- * inner on process error eventhandler
- * @prop {Function}
- * @private
- */
-let _onErr       = null;
-/**
- * inner on process close eventhandler
- * @prop {Function}
- * @private
- */
-let _onClose     = null;
-
-/**
  * check if typeof function
  * @function isFunction
  * @private
@@ -75,8 +26,16 @@ const isFunction = function (value) {
 
 class ProcessHelper {
     constructor (path, args) {
-        _processpath = path;
-        _arguments = args;
+        this.privates = {
+            processpath: path,
+            args: args,
+            onOut: null,
+            onErr: null,
+            onClose: null,
+            contentType: null,
+            response: null,
+            instance: null
+        }
     }
 
     /**
@@ -84,14 +43,14 @@ class ProcessHelper {
      * @prop {Function} onOut
      */
     get onOut () {
-        return _onOut;
+        return this.privates.onOut;
     } 
 
     set onOut (v) {
         if (!isFunction(v)) {
             return;
         }
-        _onOut = v;
+        this.privates.onOut = v;
     }
 
     /**
@@ -99,14 +58,14 @@ class ProcessHelper {
      * @prop {Function} onErr
      */
     get onErr () {
-        return _onErr;
+        return this.privates.onErr;
     }
 
     set onErr (v) {
         if (!isFunction(v)) {
             return;
         }
-        _onErr = v;
+        this.privates.onErr = v;
     }
 
     /**
@@ -114,14 +73,14 @@ class ProcessHelper {
      * @prop {Function} onClose
      */
     get onClose () {
-        return _onClose;
+        return this.privates.onClose;
     }
 
     set onClose (v) {
         if (!isFunction(v)) {
             return;
         }
-        _onClose = v;
+        this.privates.onClose = v;
     }
 
     /**
@@ -131,17 +90,17 @@ class ProcessHelper {
      * @param {String} contenttype Content-Type
      */
     execute (res, contenttype) {
-        _response = res;
-        _contenttype = contenttype;
-        _instance = EXEC(_processpath, _arguments);
-        _instance.stdout.on('data', data => {
-            _onOut(data, _response, _contenttype);
+        this.privates.response = res;
+        this.privates.contenttype = contenttype;
+        this.privates.instance = EXEC(this.privates.processpath, this.privates.args);
+        this.privates.instance.stdout.on('data', data => {
+            this.privates.onOut(data, this.privates.response, this.privates.contenttype);
         });
-        _instance.stderr.on('data', data => {
-            _onErr(data, _response, _contenttype);
+        this.privates.instance.stderr.on('data', data => {
+            this.privates.onErr(data, this.privates.response, this.privates.contenttype);
         });
-        _instance.on('close', code => {
-            _onClose(code, _response, _contenttype);
+        this.privates.instance.on('close', code => {
+            this.privates.onClose(code, this.privates.response, this.privates.contenttype);
         });
     }
 }

@@ -20,21 +20,6 @@ const REQU = require('./../common/request.helper');
  */
 const SQLSTRING = require('sqlstring');
 
-const NOBODYREQUESTS = ['GET', 'DELETE'];
-
-/**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-
 /**
  * read the Query Parameters from the Request and write it to parameter Property
  * @function parseParameter
@@ -71,18 +56,18 @@ const parseParameter = function (req) {
  */
 const getData = function (req, data, type) {
     try {
-        _logger.debug('try to parse request data');
+        this.privates.logger.debug('try to parse request data');
         req.contenttype = null;
         req.body = null;
 
         req.contenttype = type;
         const strData = data.toString('utf-8');
         // must the right contenttype
-        _logger.debug('use messageFormat ' + _cfg.server.messageFormat);
-        switch (_cfg.server.messageFormat) {
+        this.privates.logger.debug('use messageFormat ' + this.privates.cfg.server.messageFormat);
+        switch (this.privates.cfg.server.messageFormat) {
             case 'json':
                 if (type !== 'application/json') {
-                    _logger.warning('invalid contenttype in request');
+                    this.privates.logger.warning('invalid contenttype in request');
                     return false;
                 } else {
                     // parse data
@@ -96,7 +81,7 @@ const getData = function (req, data, type) {
                 return true;
         }
     } catch (ex) {
-        _logger.error(ex);
+        this.privates.logger.error(ex);
         return false;
     }
 };
@@ -109,18 +94,21 @@ const getData = function (req, data, type) {
  */
 const handleData = function (data) {
     try {
-        getData(this.req, data, this.req.headers['content-type']);
+        getData.bind(this.class)(this.req, data, this.req.headers['content-type']);
         this.next();
     } catch (err) {
-        _logger.error(err);
+        this.class.privates.logger.error(err);
         REQU.internalError(this.req, this.res);
     }
 };
 
 class ParserExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            cfg: cfg,
+            logger: logger,
+            nobodyrequests: ['GET', 'DELETE']
+        }
     }
 
     /**
@@ -133,11 +121,12 @@ class ParserExtension {
     parse (req, res, next) {
         req.parameter = null;
         parseParameter(req);
-        if (NOBODYREQUESTS.indexOf(req.method) === -1) {
+        if (this.privates.nobodyrequests.indexOf(req.method) === -1) {
             req.on('data', handleData.bind({
-                'req': req,
-                'res': res,
-                'next': next
+                req: req,
+                res: res,
+                next: next,
+                class: this
             }));
         } else {
             next();

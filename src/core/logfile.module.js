@@ -12,21 +12,27 @@
  * @private
  */
 const LOGWRITER = require('logwriter');
-/**
- * Logwriter Instance
- * @prop {Object} _instance
- * @private
- */
-let _instance = null;
 
 class Logfile {
+    constructor (opts) {
+        this.privates = {
+            /**
+             * Logwriter Instance
+             * @prop {Object} _instance
+             * @private
+             */
+            instance: null
+        };
+        this.options = opts;
+    }
+
     /**
      * initialize the Logwriter Instance
      * @function
      * @param {Object} opts Logwriter Options 
      */
-    static init (opts) {
-        _instance = new LOGWRITER(opts);
+    init () {
+        this.privates.instance = new LOGWRITER(this.options);
     }
 
     /**
@@ -34,8 +40,8 @@ class Logfile {
      * @function
      * @return {Object} Logwriter
      */
-    static getInstance () {
-        return _instance;
+    getInstance () {
+        return this.privates.instance;
     }
 }
 module.exports = Logfile;

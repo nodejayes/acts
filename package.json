@@ -30,11 +30,14 @@
   "scripts": {
     "start": "node test.js",
     "watch": "nodemon test.js",
-    "test": "nyc --report-dir coverage --reporter=html --reporter=lcov mocha ./spec/ && firefox coverage/index.html",
+    "test": "nyc --report-dir coverage --reporter=html --reporter=lcov mocha ./spec/",
+    "showcover": "firefox coverage/index.html",
     "report": "istanbul report -v --dir report html",
     "docu": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
   },
   "nyc": {
-    "exclude": ["spec/**"]
+    "exclude": [
+      "spec/**"
+    ]
   }
 }

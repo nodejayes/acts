@@ -24,37 +24,6 @@ const NOTALLOWED   = 'notallowed';
 const INVALIDROUTE = 'invalidroute';
 
 /**
- * Server Configuration
- * @prop {Object} _cfg
- * @private
- */
-let _cfg = null;
-/**
- * Logwriter Instance
- * @prop {Object} _logger
- * @private
- */
-let _logger = null;
-/**
- * true when the server is watching the API Files
- * @prop {Boolean} _watching
- * @private
- */
-let _watching = false;
-/**
- * Array with watcher they watching API Files
- * @prop {Array} _watcherCache
- * @private
- */
-let _watcherCache = [];
-/**
- * API reference
- * @prop {Array} _api
- * @private
- */
-let _api = [];
-
-/**
  * 
  * @function getObject
  * @private
@@ -139,17 +108,17 @@ const onChangeFolder = function (eve, filename) {
     if (eve !== 'rename') {
         return;
     }
-    const newfile = FILE.joinPath(this.watchingPath, filename);
+    const newfile = FILE.joinPath(this.watcher.watchingPath, filename);
     // look only for javascript files
     if (FILE.extname(newfile) !== '.js') {
         return;
     }
-    _logger.debug('found ext: ' + FILE.extname(newfile));
+    this.class.privates.logger.debug('found ext: ' + FILE.extname(newfile));
     FILE.getStatsAsync(newfile, function (err, stat) {
-        setTimeout(function () { _logger.debug(_api); }, 5000);
+        setTimeout(function () { this.class.privates.logger.debug(this.class.privates.api); }, 5000);
         if (err) {
             // file was deleted do unregister
-            deleteObject(getApiName(newfile), _api);
+            deleteObject(getApiName.bind(this.class)(newfile), this.class.privates.api);
         } else {
             if (stat.isDirectory(newfile)) {
                 watchFolder(newfile);
@@ -157,11 +126,11 @@ const onChangeFolder = function (eve, filename) {
             }
             // file was added do register
             try {
-                createObject(getApiName(newfile), _api, require(newfile));
+                createObject(getApiName.bind(this.class)(newfile), this.class.privates.api, require(newfile));
             } catch (e) {
-                _logger.error(e);
+                this.class.privates.logger.error(e);
             }
-            setReload(newfile);
+            setReload.bind(this.class)(newfile);
         }
     });
 };
@@ -176,7 +145,7 @@ const onChangeFolder = function (eve, filename) {
 const getApiName = function (path) {
     let result = '';
     const tmpPath = path.split(FILE.pathSep);
-    const tmpFolder = FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath)
+    const tmpFolder = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.api.routepath)
         .split(FILE.pathSep);
     let i = 0;
     while (i < tmpPath.length) {
@@ -199,10 +168,13 @@ const getApiName = function (path) {
 const watchFolder = function (path) {
     const w = FILE.watch(path);
     w.watchingPath = path;
-    w.on('change', onChangeFolder.bind(w));
+    w.on('change', onChangeFolder.bind({
+        watcher: w,
+        class: this
+    }));
     // fix win32 crash on delete watching folder
     w.on('error', onWatchError);
-    _watcherCache.push(w);
+    this.privates.watcherCache.push(w);
 };
 
 /**
@@ -217,15 +189,15 @@ const readApiDirs = function (path) {
         const absolutePath = FILE.joinPath(path, apidirs[i]);
         const stats = FILE.getStats(absolutePath);
         if (stats.isDirectory()) {
-            watchFolder(absolutePath);
-            readApiDirs(absolutePath);
+            watchFolder.bind(this)(absolutePath);
+            readApiDirs.bind(this)(absolutePath);
         } else {
-            createObject(getApiName(absolutePath), _api, require(absolutePath));
-            if (_cfg.server.api.reload) {
-                setReload(absolutePath);
+            createObject(getApiName.bind(this)(absolutePath), this.privates.api, require(absolutePath));
+            if (this.privates.cfg.server.api.reload) {
+                setReload.bind(this)(absolutePath);
             }
         }
-        _logger.debug(absolutePath);
+        this.privates.logger.debug(absolutePath);
     }
 };
 
@@ -237,13 +209,13 @@ const readApiDirs = function (path) {
  * @return {String}
  */
 const getFileName = function (path) {
-    _logger.debug('convert url to filepath ' + path);
+    this.privates.logger.debug('convert url to filepath ' + path);
     let result = '';
     let apifound = false;
     for (let i = 0; i < path.length; i++) {
         let tmpPath = path[i];
-        if (tmpPath === _cfg.server.api.routealias && !apifound) {
-            tmpPath = _cfg.server.api.routepath.split('/').join(FILE.pathSep);
+        if (tmpPath === this.privates.cfg.server.api.routealias && !apifound) {
+            tmpPath = this.privates.cfg.server.api.routepath.split('/').join(FILE.pathSep);
             apifound = true;
         }
         result += tmpPath + FILE.pathSep;
@@ -251,10 +223,10 @@ const getFileName = function (path) {
     if (result.length > 2) {
         result = result.substr(0, result.length - 1) + '.js';
     } else {
-        _logger.warning('no valid route path');
+        this.privates.logger.warning('no valid route path');
         result = '';
     }
-    result = _cfg.serverdir + result;
+    result = this.privates.cfg.serverdir + result;
     return result;
 };
 
@@ -268,13 +240,13 @@ const getFileName = function (path) {
  */
 const checkRoute = function (path, method) {
     let result;
-    _logger.debug('try to get route ' + method + ' ' + getApiName(path));
+    this.privates.logger.debug('try to get route ' + method + ' ' + getApiName.bind(this)(path));
     // load the file and check the method
-    var r = getObject(getApiName(path), _api);
+    var r = getObject(getApiName.bind(this)(path), this.privates.api);
     if (r !== null && typeof r[method] === 'function') {
         result = r[method];
     } else {
-        _logger.warning('route is notallowed ' + path + ' ' + method);
+        this.privates.logger.warning('route is notallowed ' + path + ' ' + method);
         return NOTALLOWED;
     }
     return result;
@@ -287,15 +259,15 @@ const checkRoute = function (path, method) {
  */
 const onReload = function (eve) {
     if (eve === 'change') {
-        delete require.cache[this.path];
+        delete require.cache[this.context.path];
         try {
-            createObject(getApiName(this.path), _api, require(this.path));
+            createObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api, require(this.context.path));
         } catch (e) {
-            _logger.error(e);
-            _logger.debug('remove route');
-            deleteObject(getApiName(this.path), _api);
+            this.class.privates.logger.error(e);
+            this.class.privates.logger.debug('remove route');
+            deleteObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api);
         }
-        _logger.debug('update api ' + this.path);
+        this.class.privates.logger.debug('update api ' + this.context.path);
     }
 };
 
@@ -307,8 +279,8 @@ const onReload = function (eve) {
  */
 const reloadContext = function (path) {
     return {
-        'path': path,
-        'onReload': onReload
+        path: path,
+        onReload: onReload
     };
 };
 
@@ -320,10 +292,13 @@ const reloadContext = function (path) {
  */
 const setReload = function (path) {
     const ctx = reloadContext(path);
-    const w = FILE.watch(path, {'encoding': 'buffer'}, ctx.onReload.bind(ctx));
+    const w = FILE.watch(path, {'encoding': 'buffer'}, ctx.onReload.bind({
+        context: ctx,
+        class: this
+    }));
     // fix win32 crash on delete watching folder
     w.on('error', onWatchError);
-    _watcherCache.push(w);
+    this.privates.watcherCache.push(w);
 };
 
 /**
@@ -334,7 +309,7 @@ const setReload = function (path) {
  */
 const withoutParameter = function (path) {
     let pos = path.indexOf('?');
-    _logger.debug('find ? on pos ' + pos + ' => ' + path);
+    this.privates.logger.debug('find ? on pos ' + pos + ' => ' + path);
     return pos > 0 ? path.substr(0, pos) : path;
 };
 
@@ -348,9 +323,9 @@ const withoutParameter = function (path) {
  * @return {Boolean} allowed?
  */
 const checkIfAllowed = function (res, method, route) {
-    if (_cfg.server.api.allowedMethods.indexOf(method) === -1 || 
+    if (this.privates.cfg.server.api.allowedMethods.indexOf(method) === -1 || 
         route === NOTALLOWED) {
-        _logger.warning('no allowed method or route');
+        this.privates.logger.warning('no allowed method or route');
         REQU.notAllowedMethod(undefined, res);
         return false;
     }
@@ -368,8 +343,8 @@ const checkIfAllowed = function (res, method, route) {
  */
 const checkIfInvalidRoute = function (res, path, route) {
     if (typeof path !== typeof [] || path.length < 2 ||
-        path[1] !== _cfg.server.api.routealias || route === INVALIDROUTE) {
-        _logger.warning('invalid route path');
+        path[1] !== this.privates.cfg.server.api.routealias || route === INVALIDROUTE) {
+        this.privates.logger.warning('invalid route path');
         REQU.notFound(undefined, res);
         return false;
     }
@@ -388,9 +363,10 @@ const checkIfInvalidRoute = function (res, path, route) {
  * @param {Function} next 
  */
 const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, next) {
-  dobefore(req, res, function () {
-    executeRoute(route, req, res, doafter, next);
-  });
+    let ctx = this;
+    dobefore(req, res, function () {
+        executeRoute.bind(ctx)(route, req, res, doafter, next);
+    });
 };
 
 /**
@@ -404,10 +380,11 @@ const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, ne
  * @param {Function} next 
  */
 const executeRoute = function (route, req, res, doafter, next) {
+    let ctx = this;
     route(req, res, function (result) {
-        _logger.debug('parse route result');
+        ctx.privates.logger.debug('parse route result');
         let content = '';
-        switch (_cfg.server.messageFormat) {
+        switch (ctx.privates.cfg.server.messageFormat) {
             case 'json':
                 content = 'application/json';
                 break;
@@ -420,10 +397,10 @@ const executeRoute = function (route, req, res, doafter, next) {
         try {
             REQU.okWithData(req, res, content, JSON.stringify(result));
         } catch (ex) {
-            _logger.error(ex);
+            ctx.privates.logger.error(ex);
         }
 
-        _logger.debug('sending result');
+        ctx.privates.logger.debug('sending result');
         if (typeof doafter === 'function') {
             doafter(req, res, result, function () { 
                 next(); 
@@ -440,12 +417,12 @@ const executeRoute = function (route, req, res, doafter, next) {
  * @private
  */
 const initWatching = function () {
-    if (!_watching) {
-        watchFolder(
-            FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
-        readApiDirs(
-            FILE.joinPath(_cfg.serverdir, _cfg.server.api.routepath));
-        _watching = true;
+    if (!this.privates.watching) {
+        watchFolder.bind(this)(
+            FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.api.routepath));
+        readApiDirs.bind(this)(
+            FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.api.routepath));
+        this.privates.watching = true;
     }
 };
 
@@ -455,19 +432,24 @@ const initWatching = function () {
  * @private
  */
 const stopWatching = function () {
-    if (_watching) {
-        for (let i = 0; i < _watcherCache.length; i++) {
-            _watcherCache[i].close();
+    if (this.privates.watching) {
+        for (let i = 0; i < this.privates.watcherCache.length; i++) {
+            this.privates.watcherCache[i].close();
         }
-        _watcherCache = [];
-        _watching = false;
+        this.privates.watcherCache = [];
+        this.privates.watching = false;
     }
 };
 
 class DynamicApiExtension {
     constructor (cfg, logger) {
-        _cfg = cfg;
-        _logger = logger;
+        this.privates = {
+            cfg: cfg,
+            logger: logger,
+            watching: false,
+            watcherCache: [],
+            api: []
+        };
     }
     /**
      * handle a Request over Dynamic API
@@ -477,26 +459,26 @@ class DynamicApiExtension {
      * @param {Function} next Connect next Callback 
      */
     request (req, res, next) {
-        initWatching();
-        let path = withoutParameter(req.url).split('/');
-        let filename = getFileName(path);
+        initWatching.bind(this)();
+        let path = withoutParameter.bind(this)(req.url).split('/');
+        let filename = getFileName.bind(this)(path);
         let method = req.method;
-        let route = checkRoute(filename, method);
-        let dobefore = checkRoute(filename, 'BEFORE');
-        let doafter = checkRoute(filename, 'AFTER');
+        let route = checkRoute.bind(this)(filename, method);
+        let dobefore = checkRoute.bind(this)(filename, 'BEFORE');
+        let doafter = checkRoute.bind(this)(filename, 'AFTER');
         
-        if (checkIfAllowed(res, method, route) === false) {
+        if (checkIfAllowed.bind(this)(res, method, route) === false) {
             return;
         }
-        if (checkIfInvalidRoute(res, path, route) === false) {
+        if (checkIfInvalidRoute.bind(this)(res, path, route) === false) {
             return;
         }
 
-        _logger.debug('execute route method');
+        this.privates.logger.debug('execute route method');
         if (typeof dobefore === 'function') {
-            executeRouteAndDobefore(dobefore, route, req, res, doafter, next);
+            executeRouteAndDobefore.bind(this)(dobefore, route, req, res, doafter, next);
         } else {
-            executeRoute(route, req, res, doafter, next);
+            executeRoute.bind(this)(route, req, res, doafter, next);
         }
     }
 }
