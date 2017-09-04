@@ -204,8 +204,8 @@ const startServer = function (cb) {
         if (this.privates.cfg.server.websockets.usewebsockets && this.privates.socketio === null) {
             this.privates.logger.debug('websockets was enabled');
             this.privates.socketio = IO(server);
-            let tmpWebsockets = new Websockets(this.privates.cfg, this.privates.logger);
-            this.privates.socketio.on('connection', tmpWebsockets.setEventsOnSocket);
+            let tmpWebsockets = new Websocket(this.privates.cfg, this.privates.logger);
+            this.privates.socketio.on('connection', tmpWebsockets.setEventsOnSocket.bind(tmpWebsockets));
         }
 
         // handle Server Events

@@ -12,6 +12,10 @@ describe('API Specs', function () {
                 port: 8086,
                 api: {
                     allowedMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'CUSTOM']
+                },
+                websockets: {
+                    usewebsockets: true,
+                    socketpath: 'sockets'
                 }
             }
         });

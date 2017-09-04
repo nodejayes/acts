@@ -8,6 +8,10 @@ Acts.createServer(PATH.join(__dirname, '..'), {
         port: 8086,
         api: {
             allowedMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'CUSTOM']
+        },
+        websockets: {
+            usewebsockets: true,
+            socketpath: 'sockets'
         }
     }
 });
