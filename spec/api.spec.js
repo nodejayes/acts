@@ -2,6 +2,11 @@ const ASSERT = require('assert');
 
 describe('API Specs', function () {
     const HTTP = require('http');
+    const FS = require('fs');
+    const PATH = require('path');
+    const APIPATH = PATH.join(__dirname, 'api', 'test1.js');
+    const APIDIR = PATH.join(__dirname, 'api', 'xxxx');
+    const APIPATH2 = PATH.join(APIDIR, 'test.js');
     let Acts = null;
 
     beforeEach(function () {
@@ -152,6 +157,24 @@ describe('API Specs', function () {
                 done(err);
             });
             req.end();
+        });
+    });
+
+    it('reload on change', function (done) {
+        Acts.start(function () {
+            FS.writeFileSync(APIPATH, 'module.exports.GET=function(req, res, next){ next("hallo"); };', {
+                encoding: 'utf8'
+            });
+            FS.mkdirSync(APIDIR);
+            FS.writeFileSync(APIPATH2, 'module.exports.GET=function(req, res, next){ next("hallo"); };', {
+                encoding: 'utf8'
+            });
+            setTimeout(function () {
+                FS.unlinkSync(APIPATH);
+                FS.unlinkSync(APIPATH2);
+                FS.rmdirSync(APIDIR);
+                done();
+            }, 500);
         });
     });
 });

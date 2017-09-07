@@ -114,23 +114,24 @@ const onChangeFolder = function (eve, filename) {
         return;
     }
     this.class.privates.logger.debug('found ext: ' + FILE.extname(newfile));
+    let ctx = this;
     FILE.getStatsAsync(newfile, function (err, stat) {
-        setTimeout(function () { this.class.privates.logger.debug(this.class.privates.api); }, 5000);
+        setTimeout(function () { ctx.class.privates.logger.debug(ctx.class.privates.api); }, 50);
         if (err) {
             // file was deleted do unregister
-            deleteObject(getApiName.bind(this.class)(newfile), this.class.privates.api);
+            deleteObject(getApiName.bind(ctx.class)(newfile), ctx.class.privates.api);
         } else {
             if (stat.isDirectory(newfile)) {
-                watchFolder(newfile);
+                watchFolder.bind(ctx.class)(newfile);
                 return;
             }
             // file was added do register
             try {
-                createObject(getApiName.bind(this.class)(newfile), this.class.privates.api, require(newfile));
+                createObject(getApiName.bind(ctx.class)(newfile), ctx.class.privates.api, require(newfile));
             } catch (e) {
-                this.class.privates.logger.error(e);
+                ctx.class.privates.logger.error(e);
             }
-            setReload.bind(this.class)(newfile);
+            setReload.bind(ctx.class)(newfile);
         }
     });
 };
@@ -480,6 +481,10 @@ class DynamicApiExtension {
         } else {
             executeRoute.bind(this)(route, req, res, doafter, next);
         }
+    }
+
+    shutdown () {
+        stopWatching.bind(this)();
     }
 }
 module.exports = DynamicApiExtension;

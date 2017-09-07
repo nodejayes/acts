@@ -1,5 +1,6 @@
 describe('SSL Specs', function () {
     const PATH = require('path');
+    const HTTP = require('http');
     let Acts = require('./../index');
     let testcert = PATH.join(__dirname, 'certs', 'test.cert');
     let testkey = PATH.join(__dirname, 'certs', 'test.key');
@@ -19,8 +20,23 @@ describe('SSL Specs', function () {
             }
         });
         Acts.start(function () {
-            Acts.shutdown();
-            done();
+            let req = HTTP.request({
+                protocol: 'http:',
+                host: 'localhost',
+                port: 8086,
+                path: '/api/test',
+                method: 'GET'
+            });
+            req.on('response', resp => {
+                ASSERT.equal(resp.statusCode, 307, 'invalid status code on GET');
+                Acts.shutdown();
+                done();
+            });
+            req.on('abort', err => {
+                Acts.shutdown();
+                done(err);
+            });
+            req.end();
         });
     });
 

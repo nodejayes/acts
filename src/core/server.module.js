@@ -112,8 +112,8 @@ const initStandardModules = function () {
     this.privates.app.use(tmpStaticFile.request.bind(tmpStaticFile));
 
     // use dynamic api
-    let tmpDynamicApi = new DynamicApi(this.privates.cfg, this.privates.logger);
-    this.privates.app.use(tmpDynamicApi.request.bind(tmpDynamicApi));
+    this.privates.dynamicapi = new DynamicApi(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(this.privates.dynamicapi.request.bind(this.privates.dynamicapi));
 };
 
 /**
@@ -235,7 +235,8 @@ class ActsServer {
             plugins: plugins,
             accessInstance: new Access(cfg, logger),
             socketio: null,
-            ssloptions: null
+            ssloptions: null,
+            dynamicapi: null
         }
 
         FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.webroot));
@@ -261,6 +262,7 @@ class ActsServer {
      * @memberof ActsServer
      */
     shutdown () {
+        this.privates.dynamicapi.shutdown();
         delete this.privates;
     }
 }
