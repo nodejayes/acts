@@ -33,7 +33,8 @@
     "test": "nyc --report-dir coverage --reporter=html --reporter=lcov mocha ./spec/",
     "showcover": "firefox coverage/index.html",
     "report": "istanbul report -v --dir report html",
-    "docu": "./node_modules/.bin/jsdoc -c ./.jsdoc.json"
+    "docu": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
+    "sendsonar": "node sonar.js"
   },
   "nyc": {
     "exclude": [
