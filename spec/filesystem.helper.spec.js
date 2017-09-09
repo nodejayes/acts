@@ -7,7 +7,7 @@ describe('FileSystem Helper Specs', function () {
     const TESTDIR = PATH.join(__dirname, 'test', 'recursive');
     const TESTFILE = PATH.join(__dirname, 'api.spec.js');
 
-    it('can get file stats async', function () {
+    it('can get file stats async', function (done) {
         FSH.getStatsAsync(TESTFILE, (err, stat) => {
             if (err) {
                 done(err);

@@ -46,6 +46,7 @@ const isAbsolute = function (path) {
  * @return {String} url 
  */
 const isRouteExact = function (url, path) {
+    console.info(`route exact ${url.split('/').join('')} === ${path.split('/').join('')}`);
     return url.split('/').join('') === path.split('/').join('');
 };
 

@@ -1,4 +1,7 @@
+const ASSERT = require('assert');
+
 describe('Websockets Specs', function () {
+    const IO = require('socket.io-client');
     let Acts = require('./../index');
 
     it('boot with websockets', function () {
@@ -14,8 +17,15 @@ describe('Websockets Specs', function () {
             }
         });
         Acts.start(function () {
-            Acts.shutdown();
-            done();
+            let socket = IO('http://localhost:8086');
+            socket.on('testsend', function (data) {
+                ASSERT.deepEqual(data, {hallo:'welt'}, 'wrong data recieved');
+                setTimeout(function () {
+                    Acts.shutdown();
+                    done();
+                }, 100);
+            });
+            socket.emit('testsocket', {hallo:'welt'});
         });
     });
 });

@@ -74,6 +74,7 @@ class WebsocketExtension {
      * @param {object} socket Node Socket Object 
      */
     setEventsOnSocket (socket) {
+        console.info('socket connect');
         if (!this.privates.cfg.serverdir) {
             return;
         }
