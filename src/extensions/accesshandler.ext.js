@@ -19,18 +19,6 @@ const getUniqueId = function (socket) {
 };
 
 /**
- * close a NodeJS Socket and remove it from Cache
- * 
- * @function closeSocket
- * @private
- * @param socket {Object} NodeJS Socket Object
- */
-const closeSocket = function (socket) {
-    socket.end();
-    forgotOne.bind(this)(socket);
-};
-
-/**
  * get the Index of a Socket from IP and UniqueId
  * 
  * @function getSocketById
@@ -50,6 +38,36 @@ const getSocketById = function (ip, id) {
         }
     }
     return null;
+};
+
+/**
+ * removes a Socket from IP Cache
+ * 
+ * @function forgotOne
+ * @private
+ * @param s {Object} NodeJS Socket Object
+ */
+const forgotOne = function (s) {
+    this.privates.logger.debug('remove ' + s.remoteAddress + ' from Cache');
+    if (typeof this.privates.brain[s.remoteAddress] !== typeof undefined) {
+        this.privates.brain[s.remoteAddress]
+            .splice(getSocketById.bind(this)(s.remoteAddress, getUniqueId(s)), 1);
+        if (this.privates.brain[s.remoteAddress].length <= 0) {
+            delete this.privates.brain[s.remoteAddress];
+        }
+    }
+};
+
+/**
+ * close a NodeJS Socket and remove it from Cache
+ * 
+ * @function closeSocket
+ * @private
+ * @param socket {Object} NodeJS Socket Object
+ */
+const closeSocket = function (socket) {
+    socket.end();
+    forgotOne.bind(this)(socket);
 };
 
 /**
@@ -95,24 +113,6 @@ const storeInBrain = function (s) {
         }
     }
     this.privates.brain[s.remoteAddress].push(tmp);
-};
-
-/**
- * removes a Socket from IP Cache
- * 
- * @function forgotOne
- * @private
- * @param s {Object} NodeJS Socket Object
- */
-const forgotOne = function (s) {
-    this.privates.logger.debug('remove ' + s.remoteAddress + ' from Cache');
-    if (typeof this.privates.brain[s.remoteAddress] !== typeof undefined) {
-        this.privates.brain[s.remoteAddress]
-            .splice(getSocketById.bind(this)(s.remoteAddress, getUniqueId(s)), 1);
-        if (this.privates.brain[s.remoteAddress].length <= 0) {
-            delete this.privates.brain[s.remoteAddress];
-        }
-    }
 };
 
 /**

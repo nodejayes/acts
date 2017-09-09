@@ -8,6 +8,28 @@
 const REQU = require('./../common/request.helper');
 
 /**
+ * Get the right CORS Header Definition
+ * @function getHeader
+ * @private
+ * @param {String} des Keyword from Configfile
+ * @returns {String} CORS Headerkey Definition
+ */
+const getHeader = function (des) {
+    switch (des) {
+        case 'origin':
+            return 'Access-Control-Allow-Origin';
+        case 'methods':
+            return 'Access-Control-Request-Method';
+        case 'headers':
+            return 'Access-Control-Request-Headers';
+        case 'credentials':
+            return 'Access-Control-Allow-Credentials';
+        default:
+            return null;
+    }
+};
+
+/**
  * Handle a CORS Request
  * @function checkRequest
  * @param {Object} req the NodeJs Request Object
@@ -39,28 +61,6 @@ const checkRequest = function (req, res, next) {
         }
     }
     REQU.ok(req, res);
-};
-
-/**
- * Get the right CORS Header Definition
- * @function getHeader
- * @private
- * @param {String} des Keyword from Configfile
- * @returns {String} CORS Headerkey Definition
- */
-const getHeader = function (des) {
-    switch (des) {
-        case 'origin':
-            return 'Access-Control-Allow-Origin';
-        case 'methods':
-            return 'Access-Control-Request-Method';
-        case 'headers':
-            return 'Access-Control-Request-Headers';
-        case 'credentials':
-            return 'Access-Control-Allow-Credentials';
-        default:
-            return null;
-    }
 };
 
 class CorsExtension {

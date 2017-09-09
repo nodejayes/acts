@@ -78,16 +78,16 @@ class FileSystemHelper {
      */
     static folderDiff (startfolder, currentfolder) {
         let result = '';
-        let tmpstart = startfolder.split(PATH.sep);
-        let tmpcurrent = currentfolder.split(PATH.sep);
-        if (tmpcurrent.length < tmpstart.length) {
+        const TMPSTART = startfolder.split(PATH.sep);
+        const TMPCURRENT = currentfolder.split(PATH.sep);
+        if (TMPCURRENT.length < TMPSTART.length) {
             return result;
         }
-        for (let i in tmpcurrent) {
-            if (tmpstart.length > i) {
+        for (const I in TMPCURRENT) {
+            if (TMPSTART.length > I) {
             continue;
             }
-            result += tmpcurrent[i] + '-';
+            result += TMPCURRENT[I] + '-';
         }
         return result;
     }

@@ -87,6 +87,21 @@ const phpFinish = function (data, response) {
 };
 
 /**
+ * get contenttype with the current extension
+ * @function getContentType
+ * @private
+ * @param {String} extension current File Extension
+ * @return {String} Content-Type
+ */
+const getContentType = function (extension) {
+    if (FILETYPES.hasOwnProperty(extension)) {
+        return FILETYPES[extension];
+    } else {  
+        return "text/plain";
+    }
+};
+
+/**
  * send the PHP Response
  * @event phpClose
  * @private
@@ -113,21 +128,6 @@ const checkExtension = function (extension) {
         return false;
     }
     return true;
-};
-
-/**
- * get contenttype with the current extension
- * @function getContentType
- * @private
- * @param {String} extension current File Extension
- * @return {String} Content-Type
- */
-const getContentType = function (extension) {
-    if (FILETYPES.hasOwnProperty(extension)) {
-        return FILETYPES[extension];
-    } else {  
-        return "text/plain";
-    }
 };
 
 class StaticFileExtension {

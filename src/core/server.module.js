@@ -73,6 +73,19 @@ const handleSsl = function () {
 };
 
 /**
+ * compress in gzip when activate
+ * @event handleCompress
+ * @private
+ */
+const handleCompress = function (req, res, next) {
+    if (req.headers['accept-encoding'] === 'compress, gzip') {
+        COMPRESS(this.privates.cfg)(req, res, next);
+    } else {
+        next();
+    }
+};
+
+/**
  * load the Default Modules
  * @method initStandardModules
  * @private
@@ -88,16 +101,16 @@ const initStandardModules = function () {
     this.privates.app.use(HELM());
 
     // Cors Module first
-    let tmpCors = new Cors(this.privates.cfg, this.privates.logger);
-    this.privates.app.use(tmpCors.checkRequest.bind(tmpCors));
+    const TMPCORS = new Cors(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(TMPCORS.checkRequest.bind(TMPCORS));
 
     // load redirect module
-    let tmpRedirect = new Redirect(this.privates.cfg, this.privates.logger);
-    this.privates.app.use(tmpRedirect.handle.bind(tmpRedirect));
+    const TMPREDIRECT = new Redirect(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(TMPREDIRECT.handle.bind(TMPREDIRECT));
 
     // parse request bodys
-    let tmpParser = new BodyParser(this.privates.cfg, this.privates.logger);
-    this.privates.app.use(tmpParser.parse.bind(tmpParser));
+    const TMPPARSER = new BodyParser(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(TMPPARSER.parse.bind(TMPPARSER));
 
     // gzip compression
     if (this.privates.cfg.server.compress) {
@@ -108,8 +121,8 @@ const initStandardModules = function () {
     loadPlugins.bind(this)(this.privates.plugins, this.privates.app, this.privates.cfg);
 
     // use folder for static files from config file
-    let tmpStaticFile = new StaticFile(this.privates.cfg, this.privates.logger);
-    this.privates.app.use(tmpStaticFile.request.bind(tmpStaticFile));
+    const TMPSTATICFILE = new StaticFile(this.privates.cfg, this.privates.logger);
+    this.privates.app.use(TMPSTATICFILE.request.bind(TMPSTATICFILE));
 
     // use dynamic api
     this.privates.dynamicapi = new DynamicApi(this.privates.cfg, this.privates.logger);
@@ -122,16 +135,16 @@ const initStandardModules = function () {
  * @private
  */
 const serverRunning = function () {
-    let folder = 'Server Folder: ' + this.class.privates.cfg.serverdir;
-    let server = 'Server running ' + (this.class.privates.cfg.server.ssl.usessl ? 'https' : 'http') + '://' + this.class.privates.cfg.server.address + ':' + this.class.privates.cfg.server.port;
+    const FOLDER = 'Server Folder: ' + this.class.privates.cfg.serverdir;
+    const SERVER = 'Server running ' + (this.class.privates.cfg.server.ssl.usessl ? 'https' : 'http') + '://' + this.class.privates.cfg.server.address + ':' + this.class.privates.cfg.server.port;
     if (this.class.privates.cfg.server.verbose === true) {
-        console.info(folder);
+        console.info(FOLDER);
     }
-    this.class.privates.logger.info(folder);
+    this.class.privates.logger.info(FOLDER);
     if (this.class.privates.cfg.server.verbose === true) {
-        console.info(server);
+        console.info(SERVER);
     }
-    this.class.privates.logger.info(server);
+    this.class.privates.logger.info(SERVER);
     if (typeof this.method === 'function') {
         this.method();
     }
@@ -167,20 +180,7 @@ const handleClientError = function (err, socket) {
  * @private
  */
 const handleServerClose = function () {
-  //this.privates.logger.debug('server is shutting down');
-};
-
-/**
- * compress in gzip when activate
- * @event handleCompress
- * @private
- */
-const handleCompress = function (req, res, next) {
-    if (req.headers['accept-encoding'] === 'compress, gzip') {
-        COMPRESS(this.privates.cfg)(req, res, next);
-    } else {
-        next();
-    }
+  // nothing to do for now
 };
 
 /**
@@ -204,8 +204,8 @@ const startServer = function (cb) {
         if (this.privates.cfg.server.websockets.usewebsockets && this.privates.socketio === null) {
             this.privates.logger.debug('websockets was enabled');
             this.privates.socketio = IO(server);
-            let tmpWebsockets = new Websocket(this.privates.cfg, this.privates.logger);
-            this.privates.socketio.on('connection', tmpWebsockets.setEventsOnSocket.bind(tmpWebsockets));
+            const TMPWEBSOCKETS = new Websocket(this.privates.cfg, this.privates.logger);
+            this.privates.socketio.on('connection', TMPWEBSOCKETS.setEventsOnSocket.bind(TMPWEBSOCKETS));
         }
 
         // handle Server Events

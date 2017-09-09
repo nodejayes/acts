@@ -99,14 +99,14 @@ class ActsCluster {
         }
         CFG.serverdir = workdir;
 
-        let log = new LOGFILE({
+        const LOG = new LOGFILE({
             logfilepath: CFG.server.logfile.file,
             maxfilesize: CFG.server.logfile.maxsize,
             loglevel: CFG.server.logfile.level
         });
-        log.init();
+        LOG.init();
         this.privates = {
-            logger: log.getInstance(),
+            logger: LOG.getInstance(),
             authenticate: null,
             instances: []
         };
@@ -121,7 +121,7 @@ class ActsCluster {
      * @param {Function} cb callback when Server is started 
      */
     start (cb) {
-        let options = {
+        const OPTIONS = {
             authentication: this.privates.authenticate
         };
         if (CFG.server.cluster.active) {
@@ -130,14 +130,14 @@ class ActsCluster {
                     this.privates.logger.debug('clustermode active');
                     initClusterCores.bind(this)();
                 } else {
-                    this.privates.instances.push(this.SERVER.start(cb, options));
+                    this.privates.instances.push(this.SERVER.start(cb, OPTIONS));
                 }
             } catch (ex) {
                 this.privates.logger.error(ex);
             }
         } else {
             this.privates.logger.debug('clustermode inactive, start one thread');
-            this.privates.instances.push(this.SERVER.start(cb, options));
+            this.privates.instances.push(this.SERVER.start(cb, OPTIONS));
         }
     }
 

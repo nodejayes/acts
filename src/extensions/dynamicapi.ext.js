@@ -93,49 +93,6 @@ const deleteObject = function (key, obj) {
     }
 };
 
-const onWatchError = function () {
-  // not implemented yet
-};
-
-/**
- * when a watcher folder changes
- * @event onChangeFolder
- * @private
- * @param {String} eve 
- * @param {String} filename
- */
-const onChangeFolder = function (eve, filename) {
-    if (eve !== 'rename') {
-        return;
-    }
-    const newfile = FILE.joinPath(this.watcher.watchingPath, filename);
-    // look only for javascript files
-    if (FILE.extname(newfile) !== '.js') {
-        return;
-    }
-    this.class.privates.logger.debug('found ext: ' + FILE.extname(newfile));
-    let ctx = this;
-    FILE.getStatsAsync(newfile, function (err, stat) {
-        setTimeout(function () { ctx.class.privates.logger.debug(ctx.class.privates.api); }, 50);
-        if (err) {
-            // file was deleted do unregister
-            deleteObject(getApiName.bind(ctx.class)(newfile), ctx.class.privates.api);
-        } else {
-            if (stat.isDirectory(newfile)) {
-                watchFolder.bind(ctx.class)(newfile);
-                return;
-            }
-            // file was added do register
-            try {
-                createObject(getApiName.bind(ctx.class)(newfile), ctx.class.privates.api, require(newfile));
-            } catch (e) {
-                ctx.class.privates.logger.error(e);
-            }
-            setReload.bind(ctx.class)(newfile);
-        }
-    });
-};
-
 /**
  * returns the name of the api by file
  * @function getApiName
@@ -162,6 +119,59 @@ const getApiName = function (path) {
 };
 
 /**
+ * @event onReload
+ * @private
+ * @param {Object} eve
+ */
+const onReload = function (eve) {
+    if (eve === 'change') {
+        delete require.cache[this.context.path];
+        try {
+            createObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api, require(this.context.path));
+        } catch (e) {
+            this.class.privates.logger.error(e);
+            this.class.privates.logger.debug('remove route');
+            deleteObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api);
+        }
+        this.class.privates.logger.debug('update api ' + this.context.path);
+    }
+};
+
+/**
+ * @function realodContext
+ * @private
+ * @param {String} path
+ * @return {Object}
+ */
+const reloadContext = function (path) {
+    return {
+        path: path,
+        onReload: onReload
+    };
+};
+
+const onWatchError = function () {
+    // not implemented yet
+};
+
+/**
+ * @function setReload
+ * @private
+ * @param {String} path
+ * @return {Object}
+ */
+const setReload = function (path) {
+    const ctx = reloadContext(path);
+    const w = FILE.watch(path, {'encoding': 'buffer'}, ctx.onReload.bind({
+        context: ctx,
+        class: this
+    }));
+    // fix win32 crash on delete watching folder
+    w.on('error', onWatchError);
+    this.privates.watcherCache.push(w);
+};
+
+/**
  * @function watchFolder
  * @private
  * @param {String} path
@@ -176,6 +186,45 @@ const watchFolder = function (path) {
     // fix win32 crash on delete watching folder
     w.on('error', onWatchError);
     this.privates.watcherCache.push(w);
+};
+
+/**
+ * when a watcher folder changes
+ * @event onChangeFolder
+ * @private
+ * @param {String} eve 
+ * @param {String} filename
+ */
+const onChangeFolder = function (eve, filename) {
+    if (eve !== 'rename') {
+        return;
+    }
+    const newfile = FILE.joinPath(this.watcher.watchingPath, filename);
+    // look only for javascript files
+    if (FILE.extname(newfile) !== '.js') {
+        return;
+    }
+    this.class.privates.logger.debug('found ext: ' + FILE.extname(newfile));
+    const CTX = this;
+    FILE.getStatsAsync(newfile, function (err, stat) {
+        setTimeout(function () { CTX.class.privates.logger.debug(CTX.class.privates.api); }, 50);
+        if (err) {
+            // file was deleted do unregister
+            deleteObject(getApiName.bind(CTX.class)(newfile), CTX.class.privates.api);
+        } else {
+            if (stat.isDirectory(newfile)) {
+                watchFolder.bind(CTX.class)(newfile);
+                return;
+            }
+            // file was added do register
+            try {
+                createObject(getApiName.bind(CTX.class)(newfile), CTX.class.privates.api, require(newfile));
+            } catch (e) {
+                CTX.class.privates.logger.error(e);
+            }
+            setReload.bind(CTX.class)(newfile);
+        }
+    });
 };
 
 /**
@@ -254,64 +303,15 @@ const checkRoute = function (path, method) {
 };
 
 /**
- * @event onReload
- * @private
- * @param {Object} eve
- */
-const onReload = function (eve) {
-    if (eve === 'change') {
-        delete require.cache[this.context.path];
-        try {
-            createObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api, require(this.context.path));
-        } catch (e) {
-            this.class.privates.logger.error(e);
-            this.class.privates.logger.debug('remove route');
-            deleteObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api);
-        }
-        this.class.privates.logger.debug('update api ' + this.context.path);
-    }
-};
-
-/**
- * @function realodContext
- * @private
- * @param {String} path
- * @return {Object}
- */
-const reloadContext = function (path) {
-    return {
-        path: path,
-        onReload: onReload
-    };
-};
-
-/**
- * @function setReload
- * @private
- * @param {String} path
- * @return {Object}
- */
-const setReload = function (path) {
-    const ctx = reloadContext(path);
-    const w = FILE.watch(path, {'encoding': 'buffer'}, ctx.onReload.bind({
-        context: ctx,
-        class: this
-    }));
-    // fix win32 crash on delete watching folder
-    w.on('error', onWatchError);
-    this.privates.watcherCache.push(w);
-};
-
-/**
  * @function withoutParameter
  * @private
  * @param {String} path
  * @return {Object} 
  */
 const withoutParameter = function (path) {
-    let pos = path.indexOf('?');
-    this.privates.logger.debug('find ? on pos ' + pos + ' => ' + path);
-    return pos > 0 ? path.substr(0, pos) : path;
+    const POS = path.indexOf('?');
+    this.privates.logger.debug('find ? on pos ' + POS + ' => ' + path);
+    return POS > 0 ? path.substr(0, POS) : path;
 };
 
 /**
@@ -353,24 +353,6 @@ const checkIfInvalidRoute = function (res, path, route) {
 }
 
 /**
- * execute before handler in Route when exists
- * @function executeRouteAndDobefore
- * @private
- * @param {Function} dobefore 
- * @param {String} route 
- * @param {Object} req 
- * @param {Object} res 
- * @param {Function} doafter 
- * @param {Function} next 
- */
-const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, next) {
-    let ctx = this;
-    dobefore(req, res, function () {
-        executeRoute.bind(ctx)(route, req, res, doafter, next);
-    });
-};
-
-/**
  * runs a Route ans send Response
  * @function executeRoute
  * @private
@@ -381,11 +363,11 @@ const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, ne
  * @param {Function} next 
  */
 const executeRoute = function (route, req, res, doafter, next) {
-    let ctx = this;
+    const CTX = this;
     route(req, res, function (result) {
-        ctx.privates.logger.debug('parse route result');
+        CTX.privates.logger.debug('parse route result');
         let content = '';
-        switch (ctx.privates.cfg.server.messageFormat) {
+        switch (CTX.privates.cfg.server.messageFormat) {
             case 'json':
                 content = 'application/json';
                 break;
@@ -398,10 +380,10 @@ const executeRoute = function (route, req, res, doafter, next) {
         try {
             REQU.okWithData(req, res, content, JSON.stringify(result));
         } catch (ex) {
-            ctx.privates.logger.error(ex);
+            CTX.privates.logger.error(ex);
         }
 
-        ctx.privates.logger.debug('sending result');
+        CTX.privates.logger.debug('sending result');
         if (typeof doafter === 'function') {
             doafter(req, res, result, function () { 
                 next(); 
@@ -409,6 +391,24 @@ const executeRoute = function (route, req, res, doafter, next) {
         } else {
             next();
         }
+    });
+};
+
+/**
+ * execute before handler in Route when exists
+ * @function executeRouteAndDobefore
+ * @private
+ * @param {Function} dobefore 
+ * @param {String} route 
+ * @param {Object} req 
+ * @param {Object} res 
+ * @param {Function} doafter 
+ * @param {Function} next 
+ */
+const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, next) {
+    const CTX = this;
+    dobefore(req, res, function () {
+        executeRoute.bind(CTX)(route, req, res, doafter, next);
     });
 };
 
@@ -461,25 +461,26 @@ class DynamicApiExtension {
      */
     request (req, res, next) {
         initWatching.bind(this)();
-        let path = withoutParameter.bind(this)(req.url).split('/');
-        let filename = getFileName.bind(this)(path);
-        let method = req.method;
-        let route = checkRoute.bind(this)(filename, method);
-        let dobefore = checkRoute.bind(this)(filename, 'BEFORE');
-        let doafter = checkRoute.bind(this)(filename, 'AFTER');
+
+        const PATH     = withoutParameter.bind(this)(req.url).split('/');
+        const FILENAME = getFileName.bind(this)(PATH);
+        const METHOD   = req.method;
+        const ROUTE    = checkRoute.bind(this)(FILENAME, METHOD);
+        const DOBEFORE = checkRoute.bind(this)(FILENAME, 'BEFORE');
+        const DOAFTER  = checkRoute.bind(this)(FILENAME, 'AFTER');
         
-        if (checkIfAllowed.bind(this)(res, method, route) === false) {
+        if (checkIfAllowed.bind(this)(res, METHOD, ROUTE) === false) {
             return;
         }
-        if (checkIfInvalidRoute.bind(this)(res, path, route) === false) {
+        if (checkIfInvalidRoute.bind(this)(res, PATH, ROUTE) === false) {
             return;
         }
 
         this.privates.logger.debug('execute route method');
-        if (typeof dobefore === 'function') {
-            executeRouteAndDobefore.bind(this)(dobefore, route, req, res, doafter, next);
+        if (typeof DOBEFORE === 'function') {
+            executeRouteAndDobefore.bind(this)(DOBEFORE, ROUTE, req, res, DOAFTER, next);
         } else {
-            executeRoute.bind(this)(route, req, res, doafter, next);
+            executeRoute.bind(this)(ROUTE, req, res, DOAFTER, next);
         }
     }
 

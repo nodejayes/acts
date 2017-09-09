@@ -1,5 +1,5 @@
 projectKey=acts
 serverUrl=https://sw-gis.de:8082
 dashboardUrl=https://sw-gis.de:8082/dashboard/index/acts
-ceTaskId=AV5mjfMflW014-FF4RLx
-ceTaskUrl=https://sw-gis.de:8082/api/ce/task?id=AV5mjfMflW014-FF4RLx
+ceTaskId=AV5nDLyk7nBTSXFX7la5
+ceTaskUrl=https://sw-gis.de:8082/api/ce/task?id=AV5nDLyk7nBTSXFX7la5
