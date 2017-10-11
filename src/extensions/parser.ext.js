@@ -66,7 +66,8 @@ const getData = function (req, data, type) {
         this.privates.logger.debug('use messageFormat ' + this.privates.cfg.server.messageFormat);
         switch (this.privates.cfg.server.messageFormat) {
             case 'json':
-                if (type !== 'application/json') {
+                let tmpType = type.split(';');
+                if (tmpType.indexOf('application/json') === -1) {
                     this.privates.logger.warning('invalid contenttype in request');
                     return false;
                 } else {
