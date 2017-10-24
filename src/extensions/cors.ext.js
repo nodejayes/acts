@@ -19,9 +19,9 @@ const getHeader = function (des) {
         case 'origin':
             return 'Access-Control-Allow-Origin';
         case 'methods':
-            return 'Access-Control-Request-Method';
+            return 'Access-Control-Allow-Methods';
         case 'headers':
-            return 'Access-Control-Request-Headers';
+            return 'Access-Control-Allow-Headers';
         case 'credentials':
             return 'Access-Control-Allow-Credentials';
         default:
