@@ -10,7 +10,10 @@ describe('Plugins Specs', function () {
             }
         }, [
             function () { /* will be not loaded */ },
-            PATH.join(__dirname, 'plugin', 'test.js')
+            {
+                src: PATH.join(__dirname, 'plugin', 'test.js'),
+                cfg: { /* Configuration pass here */ }
+            }
         ]);
         Acts.start(function () {
             Acts.shutdown();

@@ -42,10 +42,10 @@ const loadPlugins = function (plugins, server, cfg) {
     for (let i = 0, length = plugins.length; i < length; i++) {
         const plugin = plugins[i];
         try {
-            require(plugin)(server, cfg);
-            this.privates.logger.debug('plugin ' + plugin + ' successfully loaded');
+            require(plugin.src)(server, cfg, plugin.cfg);
+            this.privates.logger.debug('plugin ' + plugin.src + ' successfully loaded');
         } catch (err) {
-            this.privates.logger.debug('error while load plugin ' + plugin);
+            this.privates.logger.debug('error while load plugin ' + plugin.src);
             this.privates.logger.error(err);
         }
     }
