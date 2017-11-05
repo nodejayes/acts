@@ -15,6 +15,7 @@ const CONNECT    = require('connect');
 const IO         = require('socket.io');
 const COMPRESS   = require('compression');
 const HELM       = require('helmet');
+const _          = require('lodash');
 
 const FileSys     = require('./../common/filesystem.helper');
 const Request     = require('./../common/request.helper');
@@ -42,7 +43,9 @@ const loadPlugins = function (plugins, server, cfg) {
     for (let i = 0, length = plugins.length; i < length; i++) {
         const plugin = plugins[i];
         try {
-            require(plugin.src)(server, Object.freeze(cfg), Object.freeze(plugin.cfg));
+            let copyCfg = _.clone(cfg);
+            let copyPluginCfg = _.clone(plugin.cfg);
+            require(plugin.src)(server, Object.freeze(copyCfg), Object.freeze(copyPluginCfg));
             this.privates.logger.debug('plugin ' + plugin.src + ' successfully loaded');
         } catch (err) {
             this.privates.logger.debug('error while load plugin ' + plugin.src);

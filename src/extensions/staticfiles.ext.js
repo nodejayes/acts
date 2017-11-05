@@ -158,15 +158,14 @@ class StaticFileExtension {
      * @param {Function} next Connect next Callback 
      */
     request (req, res, next) {
-        let filepath = ROOT + this.privates.cfg.server.webroot + req.url.split('/').join(FILE.pathSep).trim();
         const absolutepath = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, req.url.split('/').join(FILE.pathSep)).trim();
         this.privates.logger.debug('request ' + absolutepath);
         // correct root with index.html
-        if (filepath === ROOT + this.privates.cfg.server.webroot + FILE.pathSep) {
-            filepath = ROOT + this.privates.cfg.server.webroot + FILE.pathSep + 'index.html';
+        if (absolutepath === FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot) + FILE.pathSep) {
+            absolutepath = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot) + FILE.pathSep + 'index.html';
         }
         try {
-            const extension = FILE.extname(filepath);
+            const extension = FILE.extname(absolutepath);
             if (!checkExtension.bind(this)(extension)) {
                 this.privates.logger.warning('file extension not allowed');
                 next();
@@ -182,9 +181,9 @@ class StaticFileExtension {
                 php.execute(res);
                 return;
             }
-            const content = FILE.getFileContent(filepath);
+            const content = FILE.getFileContent(absolutepath);
             REQU.okWithData(req, res, contenttype, content);
-            this.privates.logger.debug('sending file: ' + filepath);
+            this.privates.logger.debug('sending file: ' + absolutepath);
         } catch (ex) {
             this.privates.logger.error(ex);
             next();
