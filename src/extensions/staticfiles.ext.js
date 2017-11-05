@@ -158,7 +158,7 @@ class StaticFileExtension {
      * @param {Function} next Connect next Callback 
      */
     request (req, res, next) {
-        const absolutepath = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, req.url.split('/').join(FILE.pathSep)).trim();
+        let absolutepath = FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, req.url.split('/').join(FILE.pathSep)).trim();
         this.privates.logger.debug('request ' + absolutepath);
         // correct root with index.html
         if (absolutepath === FILE.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot) + FILE.pathSep) {
