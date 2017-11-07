@@ -37,15 +37,14 @@ const getHeader = function (des) {
  * @return {Boolean} Returns true when CORS was handled or is disabled
  */
 const checkRequest = function (req, res, next) {
-    if (req.method !== 'OPTIONS') {
-        this.privates.logger.warning('request has no OPTIONS Method CORS Check Skip');
-        next();
-        return;
-    }
     this.privates.logger.debug('check request for cors ' + req.path);
     if (!this.privates.cfg.server.cors.enabled) {
         this.privates.logger.warning('CORS is disabled');
-        REQU.ok(req, res);
+        if (req.method === 'OPTIONS') {
+            REQU.ok(req, res);
+        } else {
+            next();
+        }
         return;
     }
 
@@ -60,7 +59,11 @@ const checkRequest = function (req, res, next) {
             res.setHeader(headerdescription, opt[x].toString());
         }
     }
-    REQU.ok(req, res);
+    if (req.method === 'OPTIONS') {
+        REQU.ok(req, res);
+    } else {
+        next();
+    }
 };
 
 class CorsExtension {
