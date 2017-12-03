@@ -108,6 +108,7 @@ class ActsCluster {
         this.privates = {
             logger: LOG.getInstance(),
             authenticate: null,
+            hook: null,
             instances: []
         };
         this.privates.logger.debug('initialization successfully');
@@ -122,7 +123,8 @@ class ActsCluster {
      */
     start (cb) {
         const OPTIONS = {
-            authentication: this.privates.authenticate
+            authentication: this.privates.authenticate,
+            hook: this.privates.hook,
         };
         if (CFG.server.cluster.active) {
             try {
@@ -166,6 +168,16 @@ class ActsCluster {
      */
     setAuthentication (method) {
         this.privates.authenticate = method;
+    }
+
+    /**
+     * set the Hook Method
+     * 
+     * @param {function} method 
+     * @memberof ActsCluster
+     */
+    setHook (method) {
+        this.privates.hook = method;
     }
 }
 module.exports = ActsCluster;

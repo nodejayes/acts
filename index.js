@@ -47,6 +47,22 @@ class Acts {
     }
 
     /**
+     * set a hook after authentication
+     * 
+     * @static
+     * @param {function} hookFunction 
+     * @memberof Acts
+     */
+    static hook (hookFunction) {
+        if (typeof hookFunction !== 'function') {
+            console.warn(`hook Function is not a Function type: ${typeof hookFunction}`);
+            return _instance;
+        }
+        _instance.setAuthentication(hookFunction);
+        return _instance;
+    }
+
+    /**
      * call Cluster start method from Acts Class
      * 
      * @static

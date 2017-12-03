@@ -130,6 +130,10 @@ const initStandardModules = function () {
     // use dynamic api
     this.privates.dynamicapi = new DynamicApi(this.privates.cfg, this.privates.logger);
     this.privates.app.use(this.privates.dynamicapi.request.bind(this.privates.dynamicapi));
+
+    if (this.privates.options.hook) {
+        this.privates.app.use(this.privates.options.hook);
+    }
 };
 
 /**
