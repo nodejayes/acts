@@ -246,9 +246,18 @@ class ActsServer {
             dynamicapi: null
         }
 
-        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.webroot));
-        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.api.routepath));
-        FileSys.createDirectoryRecursive(FileSys.joinPath(cfg.serverdir, cfg.server.websockets.socketpath));
+        const WEBROOT_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.webroot);
+        const API_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.api.routepath);
+        const SOCKET_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.websockets.socketpath);
+        let paths = [WEBROOT_PATH, API_PATH, SOCKET_PATH];
+        let i = 0;
+        while (i < paths.length) {
+            let checkPath = paths[i];
+            if (!FileSys.exists(checkPath)) {
+                FileSys.createDirectoryRecursive(checkPath);
+            }
+            i++;
+        }
         handleSsl.bind(this)();
     }
 

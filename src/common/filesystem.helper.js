@@ -99,5 +99,9 @@ class FileSystemHelper {
     static extname () {
         return PATH.extname.apply(PATH.extname, arguments);
     }
+
+    static exists () {
+        return FS.existsSync.apply(FS.existsSync, arguments);
+    }
 }
 module.exports = FileSystemHelper;
