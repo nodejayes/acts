@@ -20,7 +20,7 @@
   "devDependencies": {
     "istanbul": "^0.4.5",
     "jasmine-node": "^1.14.5",
-    "jsdoc": "^3.5.4",
+    "jsdoc": "3.5.5",
     "mocha": "^3.5.0",
     "nodemon": "^1.11.0",
     "nyc": "^11.1.0",
