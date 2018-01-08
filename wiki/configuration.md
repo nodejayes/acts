@@ -4,7 +4,7 @@
 {
   "server": {
     "logfile": {
-      "file": "/log/server.log",
+      "file": "log/server.log",
       "level": 3,
       "maxsize": "100MB"
     },
