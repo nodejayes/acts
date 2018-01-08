@@ -11,6 +11,7 @@
  */
 'use strict';
 
+const PATH = require('path');
 /**
  * Node Cluster Modul
  * @const {Object} CLUSTER
@@ -100,7 +101,7 @@ class ActsCluster {
         CFG.serverdir = workdir;
 
         const LOG = new LOGFILE({
-            logfilepath: CFG.server.logfile.file,
+            logfilepath: PATH.join(CFG.serverdir, CFG.server.logfile.file),
             maxfilesize: CFG.server.logfile.maxsize,
             loglevel: CFG.server.logfile.level
         });
