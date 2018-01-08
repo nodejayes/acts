@@ -4,9 +4,8 @@
 {
   "server": {
     "logfile": {
-      "debug": "log/debug.log",
-      "warning": "log/warning.log",
-      "error": "log/error.log",
+      "file": "/log/server.log",
+      "level": 3,
       "maxsize": "100MB"
     },
     "cluster": {
