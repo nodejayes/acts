@@ -1,10 +1,14 @@
 {
   "name": "acts",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "Acts is a Application Server that lets you easy create a Backend and Host the Client.",
   "author": {
     "name": "Markus Gilg",
     "email": "markusgilg@outlook.de"
+  },
+  "bugs": {
+    "email": "markusgilg@outlook.de",
+    "url": "https://github.com/nodejayes/acts/issues"
   },
   "license": "MIT",
   "repository": "https://github.com/nodejayes/acts.git",
@@ -35,7 +39,8 @@
     "showcover": "firefox coverage/index.html",
     "report": "istanbul report -v --dir report html",
     "docu": "./node_modules/.bin/jsdoc -c ./.jsdoc.json",
-    "sendsonar": "node sonar.js"
+    "sendsonar": "node sonar.js",
+    "coverage": "nyc --report-dir coverage --reporter=html --reporter=lcov mocha ./spec/ && nyc report --reporter=text-lcov | coveralls"
   },
   "nyc": {
     "exclude": [

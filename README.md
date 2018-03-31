@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/nodejayes/acts.svg?branch=master)](https://travis-ci.org/nodejayes/acts)
+[![Coverage Status](https://coveralls.io/repos/github/nodejayes/acts/badge.svg)](https://coveralls.io/github/nodejayes/acts)
+
 # Acts
 
 An application server that allows you to quickly create Backends and hosting Frontends.
