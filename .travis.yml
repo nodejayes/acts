@@ -13,5 +13,5 @@ deploy:
   api_key:
     secure: dDyWi/iJZor+/j0ALf5bakpgEYBSqYYv9JaedStHJV7aYfSQcDeov8xB0kWyFBtKdeV4Xq2eQ01oTIdPFIbba3FGuv2t0Hw9Z/vjrPmW3w+bsMHDtoKdlVtFW2laAw9Ts3/Sf88nMMZ+kqzfDUj3WJ3dmebUGhIZMr/U5bp4H61s0wYKl9gaJEhaxfUV5n0thqSs0SkGRXH0+jb9DFeE3D2uSD+fYGeLWSvy3zGU0smSVPArUw+15RSvpP0R7yE9XcWVhk39vtENIMGOTHpS9r3QaVi65mD5XtkUPL9pQqNatgjgmg0++IzCTW/kz1BZYly73AvrZeKi8n5wKk97gBe+pZ8YLoSMepbWa/B2kvMvcyBJl7e2cTXc60DH6b0TDz9m0EAtrd3+df208bVSFeRwyvZUvMJ8tIoa//fQ5c9nyzeTwbJfN0y+1onlFLcZFvcHv0TkLfRyudgG9KaKaFWjsl/LT8hEGMKWh6FLeG2Q2i8O80lYX6gCbNeDz9iuc0vfVlocBMdGcmRoSgHIzTRPKjC7NmXE3ElGJkpzWudr0/76Ich8qK7YH0Zk3INyvwBX67OmWZybTimHjknKBn6/Nhykj6XJZsHknbwxmf3nxIIV+Uq2lXoI85NFykGh29TUdNJKQtK6Mqdg1i0LGCJAWRcgvy3ajwVAtskX6tU=
   on:
-    repo: nodejayes/logwriter
+    repo: nodejayes/acts
     branch: master
