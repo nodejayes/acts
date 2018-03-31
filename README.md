@@ -1,5 +1,13 @@
 [![Build Status](https://travis-ci.org/nodejayes/acts.svg?branch=master)](https://travis-ci.org/nodejayes/acts)
 [![Coverage Status](https://coveralls.io/repos/github/nodejayes/acts/badge.svg)](https://coveralls.io/github/nodejayes/acts)
+[![dependencies Status](https://david-dm.org/nodejayes/acts.svg)](https://david-dm.org/nodejayes/acts)
+[![devDependency Status](https://david-dm.org/nodejayes/acts/dev-status.svg)](https://david-dm.org/nodejayes/acts#info=devDependencies)
+[![npm version](https://badge.fury.io/js/acts.svg)](https://badge.fury.io/js/acts)
+![npm](https://img.shields.io/npm/l/acts.svg)
+![npm](https://img.shields.io/npm/dt/acts.svg)
+![npm](https://img.shields.io/npm/dw/acts.svg)
+![npm](https://img.shields.io/npm/dm/acts.svg)
+![npm](https://img.shields.io/npm/dy/acts.svg)
 
 # Acts
 
