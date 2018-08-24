@@ -1,7 +1,8 @@
 let ASSERT = require('assert');
+const HTTP = require('http');
 
 describe('Hook Specification', function () {
-    it('can call hook', function () {
+    it('can call hook', function (done) {
         let Acts = require('./../index');
         Acts.createServer(__dirname, {
             server: {
@@ -28,8 +29,7 @@ describe('Hook Specification', function () {
                 ASSERT.equal(resp.statusCode, 200, 'invalid status code on GET');
                 resp.on('data', d => {
                     let body = d.toString('utf8');
-                    ASSERT.equal(JSON.parse(body), 'test ok', 'invalid request body');
-                    Acts.shutdown();
+                    ASSERT.equal(body, 'test ok', 'invalid request body');
                     done();
                 });
             });
