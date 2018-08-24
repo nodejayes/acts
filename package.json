@@ -32,7 +32,8 @@
     "nyc": "^12.0.2",
     "request": "^2.88.0",
     "sonarqube-scanner": "^2.1.0",
-    "tui-jsdoc-template": "^1.2.2"
+    "tui-jsdoc-template": "^1.2.2",
+    "socket.io-client": "latest"
   },
   "scripts": {
     "start": "node test.js",

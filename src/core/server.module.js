@@ -31,7 +31,7 @@ const Access      = require('./../extensions/accesshandler.ext');
  * try to load all Plugins
  * @function loadPlugins
  * @private
- * @param {Array} plugins Array of Plugins to load 
+ * @param {Array} plugins Array of Plugins to load
  * @param {Object} server Server Instance
  * @param {Object} cfg Server Configuration
  */
@@ -161,7 +161,7 @@ const serverRunning = function () {
  * handle Client Connect
  * @event handleClientConnect
  * @private
- * @param {Object} socket Node Socket Object 
+ * @param {Object} socket Node Socket Object
  */
 const handleClientConnect = function (socket) {
     this.privates.logger.debug('socket connect ' + socket.remoteAddress);
@@ -173,7 +173,7 @@ const handleClientConnect = function (socket) {
  * @event handleClientError
  * @private
  * @param {Object} err Error Object
- * @param {Object} socket Node Socket Object 
+ * @param {Object} socket Node Socket Object
  */
 const handleClientError = function (err, socket) {
     this.privates.logger.debug('client create a error');
@@ -244,7 +244,7 @@ class ActsServer {
             socketio: null,
             ssloptions: null,
             dynamicapi: null
-        }
+        };
 
         const WEBROOT_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.webroot);
         const API_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.api.routepath);
@@ -274,7 +274,7 @@ class ActsServer {
 
     /**
      * delete all Submodules
-     * 
+     *
      * @memberof ActsServer
      */
     shutdown () {

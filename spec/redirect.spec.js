@@ -94,6 +94,10 @@ describe('Redirect Specs', function () {
         red = new Redirect(cfg, logger);
     });
 
+    after(function () {
+        setTimeout(process.exit, 2000);
+    });
+
     it('check redirect', function () {
         red.handle(req, res, res.next);
         ASSERT.equal(res.isendcalled, true, 'end not called');

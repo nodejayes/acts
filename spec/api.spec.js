@@ -11,6 +11,7 @@ describe('API Specs', function () {
 
     beforeEach(function () {
         Acts = require('./../index');
+        Acts.shutdown();
         Acts.createServer(__dirname, {
             server: {
                 address: 'localhost',

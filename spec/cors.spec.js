@@ -6,6 +6,10 @@ describe('Cors Specs', function () {
         Acts.shutdown();
     });
 
+    after(function () {
+        setTimeout(process.exit, 2000);
+    });
+
     it('send success options request', function (done) {
         Acts.createServer(__dirname, {
             server: {

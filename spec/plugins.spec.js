@@ -2,6 +2,10 @@ describe('Plugins Specs', function () {
     const PATH = require('path');
     let Acts = require('./../index');
 
+    after(function () {
+        setTimeout(process.exit, 2000);
+    });
+
     it('load Plugin', function (done) {
         Acts.createServer(__dirname, {
             server: {

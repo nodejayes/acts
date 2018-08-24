@@ -1,10 +1,10 @@
 const ASSERT = require('assert');
 
-describe('Websockets Specs', function () {
+describe('Websockets Specs', function() {
     const IO = require('socket.io-client');
-    let Acts = require('./../index');
+    const Acts = require('./../index');
 
-    it('boot with websockets', function () {
+    before(function() {
         Acts.createServer(__dirname, {
             server: {
                 address: 'localhost',
@@ -16,14 +16,19 @@ describe('Websockets Specs', function () {
                 }
             }
         });
+    });
+
+    after(function() {
+        Acts.shutdown();
+        setTimeout(process.exit, 2000);
+    });
+
+    it('boot with websockets', function(done) {
         Acts.start(function () {
             let socket = IO('http://localhost:8086');
             socket.on('testsend', function (data) {
                 ASSERT.deepEqual(data, {hallo:'welt'}, 'wrong data recieved');
-                setTimeout(function () {
-                    Acts.shutdown();
-                    done();
-                }, 100);
+                done();
             });
             socket.emit('testsocket', {hallo:'welt'});
         });
