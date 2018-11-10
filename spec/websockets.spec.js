@@ -3,9 +3,11 @@ const ASSERT = require('assert');
 describe('Websockets Specs', function() {
     const IO = require('socket.io-client');
     const Acts = require('./../index');
+    let server;
+    let socket;
 
-    before(function() {
-        Acts.createServer(__dirname, {
+    before((done) => {
+        server = Acts.createServer(__dirname, {
             server: {
                 address: 'localhost',
                 port: 8086,
@@ -15,22 +17,26 @@ describe('Websockets Specs', function() {
                     socketpath: 'sockets'
                 }
             }
+        }, []);
+        server.start(() => {
+            socket = IO('http://localhost:8086');
+            done();
         });
     });
 
-    after(function() {
+    after(() => {
         Acts.shutdown();
+        socket.close();
+        socket = null;
+        server = null;
         setTimeout(process.exit, 2000);
     });
 
     it('boot with websockets', function(done) {
-        Acts.start(function () {
-            let socket = IO('http://localhost:8086');
-            socket.on('testsend', function (data) {
-                ASSERT.deepEqual(data, {hallo:'welt'}, 'wrong data recieved');
-                done();
-            });
-            socket.emit('testsocket', {hallo:'welt'});
+        socket.on('testsend', function (data) {
+            ASSERT.deepEqual(data, {hallo:'welt'}, 'wrong data recieved');
+            done();
         });
+        socket.emit('testsocket', {hallo:'welt'});
     });
 });

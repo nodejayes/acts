@@ -278,8 +278,10 @@ class ActsServer {
      * @memberof ActsServer
      */
     shutdown () {
-        this.privates.dynamicapi.shutdown();
-        delete this.privates;
+        if (this.privates) {
+            this.privates.dynamicapi.shutdown();
+            delete this.privates;
+        }
     }
 }
 module.exports = ActsServer;

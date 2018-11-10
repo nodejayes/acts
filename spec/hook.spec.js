@@ -66,12 +66,8 @@ describe('Hook Specification', function () {
                 method: 'GET'
             });
             req.on('response', resp => {
-                ASSERT.equal(resp.statusCode, 200, 'invalid status code on GET');
-                resp.on('data', d => {
-                    let body = d.toString('utf8');
-                    ASSERT.equal(body, 'test ok', 'invalid request body');
-                    done();
-                });
+                ASSERT.equal(resp.statusCode, 405, 'invalid status code on GET');
+                done();
             });
             req.on('abort', err => {
                 Acts.shutdown();
