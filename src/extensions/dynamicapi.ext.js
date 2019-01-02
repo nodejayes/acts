@@ -19,12 +19,13 @@ const FILE     = require('./../common/filesystem.helper');
  * @private
  */
 const REQU     = require('./../common/request.helper');
+const PATH     = require('path');
 
 const NOTALLOWED   = 'notallowed';
 const INVALIDROUTE = 'invalidroute';
 
 /**
- * 
+ *
  * @function getObject
  * @private
  * @param {String} key
@@ -76,7 +77,7 @@ const createObject = function (key, obj, data) {
 };
 
 /**
- * 
+ *
  * @function deleteObject
  * @private
  * @param {String} key
@@ -127,7 +128,9 @@ const onReload = function (eve) {
     if (eve === 'change') {
         delete require.cache[this.context.path];
         try {
-            createObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api, require(this.context.path));
+            if (PATH.extname(absolutePath) === '.js' && PATH.extname(absolutePath).length === 3) {
+                createObject(getApiName.bind(this.class)(this.context.path), this.class.privates.api, require(this.context.path));
+            }
         } catch (e) {
             this.class.privates.logger.error(e);
             this.class.privates.logger.debug('remove route');
@@ -192,7 +195,7 @@ const watchFolder = function (path) {
  * when a watcher folder changes
  * @event onChangeFolder
  * @private
- * @param {String} eve 
+ * @param {String} eve
  * @param {String} filename
  */
 const onChangeFolder = function (eve, filename) {
@@ -218,7 +221,9 @@ const onChangeFolder = function (eve, filename) {
             }
             // file was added do register
             try {
-                createObject(getApiName.bind(CTX.class)(newfile), CTX.class.privates.api, require(newfile));
+                if (PATH.extname(absolutePath) === '.js' && PATH.extname(absolutePath).length === 3) {
+                    createObject(getApiName.bind(CTX.class)(newfile), CTX.class.privates.api, require(newfile));
+                }
             } catch (e) {
                 CTX.class.privates.logger.error(e);
             }
@@ -242,7 +247,9 @@ const readApiDirs = function (path) {
             watchFolder.bind(this)(absolutePath);
             readApiDirs.bind(this)(absolutePath);
         } else {
-            createObject(getApiName.bind(this)(absolutePath), this.privates.api, require(absolutePath));
+            if (PATH.extname(absolutePath) === '.js' && PATH.extname(absolutePath).length === 3) {
+                createObject(getApiName.bind(this)(absolutePath), this.privates.api, require(absolutePath));
+            }
             if (this.privates.cfg.server.api.reload) {
                 setReload.bind(this)(absolutePath);
             }
@@ -306,7 +313,7 @@ const checkRoute = function (path, method) {
  * @function withoutParameter
  * @private
  * @param {String} path
- * @return {Object} 
+ * @return {Object}
  */
 const withoutParameter = function (path) {
     const POS = path.indexOf('?');
@@ -324,7 +331,7 @@ const withoutParameter = function (path) {
  * @return {Boolean} allowed?
  */
 const checkIfAllowed = function (res, method, route) {
-    if (this.privates.cfg.server.api.allowedMethods.indexOf(method) === -1 || 
+    if (this.privates.cfg.server.api.allowedMethods.indexOf(method) === -1 ||
         route === NOTALLOWED) {
         this.privates.logger.warning('no allowed method or route');
         REQU.notAllowedMethod(undefined, res);
@@ -337,8 +344,8 @@ const checkIfAllowed = function (res, method, route) {
  * check if Route is valid
  * @function checkIfInvalidRoute
  * @private
- * @param {Object} res Node Response Object 
- * @param {String} path path to file  
+ * @param {Object} res Node Response Object
+ * @param {String} path path to file
  * @param {String} route routepath
  * @return {Boolean} valid?
  */
@@ -356,11 +363,11 @@ const checkIfInvalidRoute = function (res, path, route) {
  * runs a Route ans send Response
  * @function executeRoute
  * @private
- * @param {String} route 
- * @param {Object} req 
- * @param {Object} res 
- * @param {Function} doafter 
- * @param {Function} next 
+ * @param {String} route
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Function} doafter
+ * @param {Function} next
  */
 const executeRoute = function (route, req, res, doafter, next) {
     const CTX = this;
@@ -385,8 +392,8 @@ const executeRoute = function (route, req, res, doafter, next) {
 
         CTX.privates.logger.debug('sending result');
         if (typeof doafter === 'function') {
-            doafter(req, res, result, function () { 
-                next(); 
+            doafter(req, res, result, function () {
+                next();
             });
         } else {
             next();
@@ -398,12 +405,12 @@ const executeRoute = function (route, req, res, doafter, next) {
  * execute before handler in Route when exists
  * @function executeRouteAndDobefore
  * @private
- * @param {Function} dobefore 
- * @param {String} route 
- * @param {Object} req 
- * @param {Object} res 
- * @param {Function} doafter 
- * @param {Function} next 
+ * @param {Function} dobefore
+ * @param {String} route
+ * @param {Object} req
+ * @param {Object} res
+ * @param {Function} doafter
+ * @param {Function} next
  */
 const executeRouteAndDobefore = function (dobefore, route, req, res, doafter, next) {
     const CTX = this;
@@ -457,7 +464,7 @@ class DynamicApiExtension {
      * @function request
      * @param {Object} req Node Request Object
      * @param {Object} res Node Response Object
-     * @param {Function} next Connect next Callback 
+     * @param {Function} next Connect next Callback
      */
     request (req, res, next) {
         initWatching.bind(this)();
@@ -468,7 +475,7 @@ class DynamicApiExtension {
         const ROUTE    = checkRoute.bind(this)(FILENAME, METHOD);
         const DOBEFORE = checkRoute.bind(this)(FILENAME, 'BEFORE');
         const DOAFTER  = checkRoute.bind(this)(FILENAME, 'AFTER');
-        
+
         if (checkIfAllowed.bind(this)(res, METHOD, ROUTE) === false) {
             return;
         }
