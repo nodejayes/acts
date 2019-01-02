@@ -1,6 +1,6 @@
 {
   "name": "acts",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "description": "Acts is a Application Server that lets you easy create a Backend and Host the Client.",
   "author": {
     "name": "Markus Gilg",
@@ -27,7 +27,6 @@
     "istanbul": "0.4.5",
     "jsdoc": "3.5.5",
     "mocha": "5.2.0",
-    "nodemon": "1.18.6",
     "nyc": "13.1.0",
     "request": "2.88.0",
     "socket.io-client": "2.1.1",
@@ -36,7 +35,6 @@
   },
   "scripts": {
     "start": "node test.js",
-    "watch": "nodemon test.js",
     "test": "nyc --report-dir coverage --reporter=html --reporter=lcov mocha ./spec/",
     "showcover": "firefox coverage/index.html",
     "report": "istanbul report -v --dir report html",
