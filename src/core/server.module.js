@@ -137,8 +137,7 @@ const initStandardModules = function () {
         try {
             const INDEX_FILE = FileSys.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, 'index.html');
             const CONTENT = FileSys.getFileContent(INDEX_FILE);
-            res.statusCode = 200;
-            res.end(CONTENT.toString('utf-8'));
+            Request.okWithData(req, res, 'text/html', CONTENT.toString('utf-8'));
         } catch (err) {
             next();
         }
