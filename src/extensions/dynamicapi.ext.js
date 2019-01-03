@@ -333,8 +333,6 @@ const withoutParameter = function (path) {
 const checkIfAllowed = function (res, method, route) {
     if (this.privates.cfg.server.api.allowedMethods.indexOf(method) === -1 ||
         route === NOTALLOWED) {
-        this.privates.logger.warning('no allowed method or route');
-        REQU.notAllowedMethod(undefined, res);
         return false;
     }
     return true;
@@ -352,8 +350,6 @@ const checkIfAllowed = function (res, method, route) {
 const checkIfInvalidRoute = function (res, path, route) {
     if (typeof path !== typeof [] || path.length < 2 ||
         path[1] !== this.privates.cfg.server.api.routealias || route === INVALIDROUTE) {
-        this.privates.logger.warning('invalid route path');
-        REQU.notFound(undefined, res);
         return false;
     }
     return true;
@@ -477,9 +473,11 @@ class DynamicApiExtension {
         const DOAFTER  = checkRoute.bind(this)(FILENAME, 'AFTER');
 
         if (checkIfAllowed.bind(this)(res, METHOD, ROUTE) === false) {
+            next();
             return;
         }
         if (checkIfInvalidRoute.bind(this)(res, PATH, ROUTE) === false) {
+            next();
             return;
         }
 

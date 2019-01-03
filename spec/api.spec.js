@@ -32,29 +32,53 @@ describe('API Specs', function () {
         Acts = null;
     });
 
+  it('redirect to Index File when nothing matched', function (done) {
+      Acts.start(function () {
+          let req = HTTP.request({
+              protocol: 'http:',
+              host: 'localhost',
+              port: 8086,
+              path: '/nothing',
+              method: 'GET'
+          });
+          req.on('response', resp => {
+              ASSERT.equal(resp.statusCode, 200, 'invalid status code on GET');
+              resp.on('data', d => {
+                  let body = d.toString('utf8');
+                  ASSERT.equal(body, 'myindexhtmlfile\r\n', 'invalid request body');
+                  done();
+              });
+          });
+          req.on('abort', err => {
+              done(err);
+          });
+          req.end();
+      });
+  });
+
     it('testing GET Method', function (done) {
-        Acts.start(function () {
-            let req = HTTP.request({
-                protocol: 'http:',
-                host: 'localhost',
-                port: 8086,
-                path: '/api/test',
-                method: 'GET'
-            });
-            req.on('response', resp => {
-                ASSERT.equal(resp.statusCode, 200, 'invalid status code on GET');
-                resp.on('data', d => {
-                    let body = d.toString('utf8');
-                    ASSERT.equal(JSON.parse(body), 'test ok', 'invalid request body');
-                    done();
-                });
-            });
-            req.on('abort', err => {
-                done(err);
-            });
-            req.end();
+    Acts.start(function () {
+      let req = HTTP.request({
+        protocol: 'http:',
+        host: 'localhost',
+        port: 8086,
+        path: '/api/test',
+        method: 'GET'
+      });
+      req.on('response', resp => {
+        ASSERT.equal(resp.statusCode, 200, 'invalid status code on GET');
+        resp.on('data', d => {
+          let body = d.toString('utf8');
+          ASSERT.equal(JSON.parse(body), 'test ok', 'invalid request body');
+          done();
         });
+      });
+      req.on('abort', err => {
+        done(err);
+      });
+      req.end();
     });
+  });
 
     it('testing POST Method', function (done) {
         Acts.start(function () {

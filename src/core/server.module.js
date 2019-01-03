@@ -131,6 +131,19 @@ const initStandardModules = function () {
     this.privates.dynamicapi = new DynamicApi(this.privates.cfg, this.privates.logger);
     this.privates.app.use(this.privates.dynamicapi.request.bind(this.privates.dynamicapi));
 
+    // redirect not handled requests to the index.html
+    // this handle scenarios with angular router
+    this.privates.app.use((req, res, next) => {
+        try {
+            const INDEX_FILE = FileSys.joinPath(this.privates.cfg.serverdir, this.privates.cfg.server.webroot, 'index.html');
+            const CONTENT = FileSys.getFileContent(INDEX_FILE);
+            res.statusCode = 200;
+            res.end(CONTENT.toString('utf-8'));
+        } catch (err) {
+            next();
+        }
+    });
+
     if (this.privates.options.hook) {
         this.privates.app.use(this.privates.options.hook);
     }
