@@ -62,6 +62,7 @@ const loadPlugins = function (plugins, server, cfg) {
 const handleSsl = function () {
     if (this.privates.cfg.server.ssl.usessl) {
         this.privates.http = require('https');
+        this.privates.http.globalAgent.maxSockets = Infinity;
         const cas = [];
         for (var i = 0, len = this.privates.cfg.server.ssl.certificationauthority.length; i < len; i++) {
             const obj = this.privates.cfg.server.ssl.certificationauthority[i];
@@ -257,6 +258,8 @@ class ActsServer {
             ssloptions: null,
             dynamicapi: null
         };
+
+        this.privates.http.globalAgent.maxSockets = Infinity;
 
         const WEBROOT_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.webroot);
         const API_PATH = FileSys.joinPath(cfg.serverdir, cfg.server.api.routepath);

@@ -67,3 +67,4 @@ webroot/**/*
 api/**/*
 log/**/*
 docs/**/*
+test/**/*
